@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="ad.size" content="width=300,height=250">
+  <title>UofT SCS - 300x250 HTML5 Banner</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script type="text/javascript">var clickTag = "https://learn.utoronto.ca";</script>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: #ffffff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      font-family: Arial, sans-serif;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    /* 300x250 Canvas Container */
+    #banner {
+      position: relative;
+      width: 300px;
+      height: 250px;
+      background-color: #002a5c;
+      overflow: hidden;
+      cursor: pointer;
+    }
+
+    /* Full-canvas stacked layers */
+    .layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 300px;
+      height: 250px;
+      pointer-events: none;
+      opacity: 0;
+    }
+
+    #pattern {
+      opacity: 1;
+      z-index: 1;
+    }
+
+    /* Blue center mask box sitting over pattern.svg
+       NOTE: width margin (35px/side) carried over unchanged from the 300x600 build
+       since canvas width is unchanged. Height margin (30px/side) is a first-pass
+       estimate for the new 250px-tall canvas -- the storyboard comps don't show a
+       hard mask edge, so nudge this once pattern.svg's actual dash density is in. */
+    #center-box {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 225px;
+      height: 198px;
+      background-color: #002a5c;
+      z-index: 2;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+    }
+
+    /* Central "and" graphic & echo layers. */
+    .and-layer {
+      position: absolute;
+      top: 125px;
+      left: 150px;
+      z-index: 5;
+      opacity: 1;
+      transform-origin: center center;
+      pointer-events: none;
+      width: 160px;
+    }
+
+    /* Small Directional Arrows -- one per career (6 total), each paired 1:1 with
+       its headline instead of two shared/reused elements. Position, top, and
+       rotation are all set in JS (see CAREER_METRICS/placeArrows) because each
+       arrow has to sit right at the edge of ITS OWN word, and that edge moves
+       depending on how long the word is ("POET" vs "PROJECT MANAGER").
+       No fixed left/top here on purpose -- JS always sets them before anything
+       is visible. */
+    .small-arrow {
+      position: absolute;
+      width: 10px;
+      height: auto;
+      z-index: 6;
+      opacity: 0;
+      pointer-events: none;
+      transform-origin: center center;
+    }
+
+    /* Career and endframe layers */
+    .career-layer {
+      z-index: 7;
+    }
+
+    .endframe-layer {
+      z-index: 10;
+    }
+
+    #endframe-arrow {
+      transform-origin: bottom left;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="banner">
+    <!-- Background Pattern -->
+    <img id="pattern" class="layer" src="pattern.svg" alt="Background Pattern">
+
+    <!-- Center Mask Box (230x190px overlaying pattern) -->
+    <div id="center-box"></div>
+
+    <!-- Center Fixed Graphic & Echo Decay Layers -->
+    <img id="and-echo-4" class="and-layer" src="and.svg" alt="">
+    <img id="and-echo-3" class="and-layer" src="and.svg" alt="">
+    <img id="and-echo-2" class="and-layer" src="and.svg" alt="">
+    <img id="and-echo-1" class="and-layer" src="and.svg" alt="">
+    <img id="and" class="and-layer" src="and.svg" alt="and">
+
+    <!-- Small Directional Arrows -- one per career, positioned next to that
+         career's own text edge (see CAREER_METRICS in the script below) -->
+    <img id="arrow-project-manager" class="small-arrow" src="small-arrow.svg" alt="">
+    <img id="arrow-poet" class="small-arrow" src="small-arrow.svg" alt="">
+    <img id="arrow-accountant" class="small-arrow" src="small-arrow.svg" alt="">
+    <img id="arrow-app-builder" class="small-arrow" src="small-arrow.svg" alt="">
+    <img id="arrow-marketer" class="small-arrow" src="small-arrow.svg" alt="">
+    <img id="arrow-data-analyst" class="small-arrow" src="small-arrow.svg" alt="">
+
+    <!-- Career Title Layers -->
+    <img id="project-manager" class="layer career-layer" src="project-manager.svg" alt="Project Manager">
+    <img id="poet" class="layer career-layer" src="poet.svg" alt="Poet">
+    <img id="accountant" class="layer career-layer" src="accountant.svg" alt="Accountant">
+    <img id="app-builder" class="layer career-layer" src="app-builder.svg" alt="App Builder">
+    <img id="marketer" class="layer career-layer" src="marketer.svg" alt="Marketer">
+    <img id="data-analyst" class="layer career-layer" src="data-analyst.svg" alt="Data Analyst">
+
+    <!-- Endframe Layers -->
+    <img id="logo" class="layer endframe-layer" src="logo.svg" alt="UofT SCS Logo">
+    <img id="endframe-copyblock" class="layer endframe-layer" src="endframe-copyblock.svg" alt="Hundreds of courses for people who refuse to pick just one thing">
+    <img id="add-your-and" class="layer endframe-layer" src="add-your-and.svg" alt="Add your and">
+    <img id="stay-unstuck" class="layer endframe-layer" src="stay-unstuck.svg" alt="Stay unstuck">
+    <img id="endframe-arrow" class="layer endframe-layer" src="endframe-arrow.svg" alt="CTA Arrow">
+  </div>
+
+  <script>
+    // Initial GSAP setup for centered positioning
+    gsap.set('.and-layer', { xPercent: -50, yPercent: -50 });
+    gsap.set('.small-arrow', { xPercent: -50, yPercent: -50 });
+
+    // How far off-canvas each career layer starts before sliding in. 320px clears
+    // the full 300px canvas width with a safety buffer regardless of exactly where
+    // the text sits inside each full-canvas SVG -- same magnitude used in the 600
+    // build, just applied to x instead of y.
+    const ENTER_OFFSET = 320;
+
+    // Gap (in px) between an arrow and the nearest edge of its paired word.
+    const ARROW_GAP = 10;
+
+    // Which side each career's text enters from -- confirmed against the
+    // storyboard. Also used to decide which edge of the text the arrow sits on
+    // and which way it points (entering from the left -> arrow sits at the
+    // word's RIGHT edge, pointing right; entering from the right -> arrow sits
+    // at the word's LEFT edge, pointing left).
+    const ENTRY_SIDE = {
+      'project-manager': 'left',
+      'poet': 'right',
+      'accountant': 'right',
+      'app-builder': 'left',
+      'marketer': 'left',
+      'data-analyst': 'right'
+    };
+
+    // Text edges for each career word, in rendered 300x250 banner pixels.
+    // Hand-tuned -- nudge these numbers to move an arrow. `left`/`right` are
+    // the word's horizontal edges (the arrow attaches to whichever side its
+    // ENTRY_SIDE calls for, offset by ARROW_GAP), `centerY` is the vertical
+    // center of the word, which becomes the arrow's `top`.
+    const CAREER_METRICS = {
+      'project-manager': {right: 275, centerY: 68 },
+      'poet': { left: 115, centerY: 190 },
+      'accountant': { left: 60, centerY: 68 },
+      'app-builder': { right: 230, centerY: 190 },
+      'marketer': {right: 220, centerY: 68 },
+      'data-analyst': { left: 60, centerY: 192 }
+    };
+
+    // Positions + orients every arrow next to its own word's edge.
+    // Assumes small-arrow.svg's default artwork points UP -- rotated 90deg
+    // clockwise/counter-clockwise here so it points inward toward wherever
+    // its word is heading.
+    function placeArrows() {
+      Object.entries(ENTRY_SIDE).forEach(([careerId, side]) => {
+        const m = CAREER_METRICS[careerId];
+        const arrowEl = document.getElementById(`arrow-${careerId}`);
+        const x = side === 'left' ? m.right + ARROW_GAP : m.left - ARROW_GAP;
+        gsap.set(arrowEl, {
+          left: x,
+          top: m.centerY,
+          rotation: side === 'left' ? 90 : -90
+        });
+      });
+    }
+
+    function createEchoPulse() {
+      // ===== EDITABLE SETTINGS =====
+      const settings = {
+        main: {
+          scale: 1.1,
+          inDuration: 0.50,
+          outDuration: 0.45,
+          easeIn: 'back.in(4)',
+          easeOut: 'back.out'
+        },
+
+        echoes: {
+          startDelay: 0.18,   // Delay before first echo
+          delayStep: 0.1,    // Delay between echoes
+          fadeInDuration: 0.12,
+          fadeOutDuration: 0.75,
+          fadeOutStep: 0.07,
+
+          startScale: 1,
+          scaleStep: 0.08,    // How much smaller each echo gets
+          endScale: 0.97,
+
+          opacity: 0.45,
+          opacityStep: 0.15,
+
+          easeIn: 'power2.out',
+          easeOut: 'power2.in'
+        }
+      };
+
+      const tl = gsap.timeline();
+
+      // ===== MAIN PULSE =====
+      tl.to('#and, #pattern', {
+        scale: settings.main.scale,
+        duration: settings.main.inDuration,
+        ease: settings.main.easeIn
+      })
+      .to('#and, #pattern', {
+        scale: 1,
+        duration: settings.main.outDuration,
+        ease: settings.main.easeOut
+      });
+
+      // ===== ECHOES =====
+      const echoes = [
+        '#and-echo-1',
+        '#and-echo-2',
+        '#and-echo-3',
+        '#and-echo-4'
+      ];
+
+      echoes.forEach((selector, i) => {
+        const scale = settings.echoes.endScale - (i * settings.echoes.scaleStep);
+        const opacity = settings.echoes.opacity - (i * settings.echoes.opacityStep);
+        const delay = settings.echoes.startDelay + (i * settings.echoes.delayStep);
+        const fadeOut = settings.echoes.fadeOutDuration + (i * settings.echoes.fadeOutStep);
+
+        tl.fromTo(selector,
+          {
+            scale: settings.echoes.startScale,
+            opacity: 0
+          },
+          {
+            scale,
+            opacity,
+            duration: settings.echoes.fadeInDuration,
+            ease: settings.echoes.easeIn
+          },
+          delay
+        )
+        .to(selector, {
+          scale: scale - 0.03,
+          opacity: 0,
+          duration: fadeOut,
+          ease: settings.echoes.easeOut
+        }, '>-0.02');
+      });
+
+      return tl;
+    }
+
+
+
+    // ----------------------------------------------------
+    // GSAP Main Animation Timeline
+    // ----------------------------------------------------
+    // Declared here, built inside initBanner() below -- the dev scrubber
+    // (further down) references this once initBanner() has run.
+    let mainTl;
+
+    function buildTimeline() {
+      mainTl = gsap.timeline({ repeat: 0 });
+
+      mainTl
+        // 1. "AND" GRAPHIC SCALES IN RIGHT OFF THE BAT
+      
+        // === SET 1: PROJECT MANAGER (in from left) & POET (in from right) ===
+        // Careers enter fully visible from off-screen, sliding in much slower
+        .fromTo(['#project-manager', '#arrow-project-manager'], { x: -ENTER_OFFSET, opacity: 1 }, { x: 0, duration: 1.5, ease: 'power1.inOut' }, 'breathingRoom1')
+        .fromTo(['#poet', '#arrow-poet'], { x: ENTER_OFFSET, opacity: 1 }, { x: 0, duration: 1.5, ease: 'power1.inOut' }, 'breathingRoom1')
+        
+        // Arrows fade out as they get closer to their resting spots
+        .to(['#arrow-project-manager', '#arrow-poet'], { opacity: 0, duration: 0.4, ease: 'power1.out' })
+        // Inject the Echo sub-timeline
+        .add(createEchoPulse(), '-=0.1')
+        .to({}, { duration: 0 }) // Hold Set 1
+
+        // Set 1 Fades Out (continue inward on the same axis they entered on, while fading)
+        .to('#project-manager', { x: 20, opacity: 0, duration: 0.5, ease: 'power2.in' })
+        .to('#poet', { x: -20, opacity: 0, duration: 0.5, ease: 'power2.in' }, '<')
+
+        // === SET 2: ACCOUNTANT (in from right) & APP BUILDER (in from left) ===
+        .fromTo(['#accountant', '#arrow-accountant'], { x: ENTER_OFFSET, opacity: 1 }, { x: 0, duration: 1.5, ease: 'power1.inOut' })
+        .fromTo(['#app-builder', '#arrow-app-builder'], { x: -ENTER_OFFSET, opacity: 1 }, { x: 0, duration: 1.5, ease: 'power1.inOut' }, '<')
+        .to(['#arrow-accountant', '#arrow-app-builder'], { opacity: 0, duration: 0.4, ease: 'power1.out' })
+        
+        .add(createEchoPulse(), '-=0.1')
+        .to({}, { duration: 0 }) // Hold Set 2
+
+        // Set 2 Fades Out
+        .to('#accountant', { x: -20, opacity: 0, duration: 0.5, ease: 'power2.in' })
+        .to('#app-builder', { x: 20, opacity: 0, duration: 0.5, ease: 'power2.in' }, '<')
+
+        // === SET 3: MARKETER (in from left) & DATA ANALYST (in from right) ===
+        .fromTo(['#marketer', '#arrow-marketer'], { x: -ENTER_OFFSET, opacity: 1 }, { x: 0, duration: 1.5, ease: 'power1.inOut' })
+        .fromTo(['#data-analyst', '#arrow-data-analyst'], { x: ENTER_OFFSET, opacity: 1 }, { x: 0, duration: 1.5, ease: 'power1.inOut' }, '<')
+        .to(['#arrow-marketer', '#arrow-data-analyst'], { opacity: 0, duration: 0.4, ease: 'power1.out' })
+        
+        .add(createEchoPulse(), '-=0.1')
+        .to({}, { duration: 0 }) // Hold Set 3
+
+        // Set 3 Fades Out
+        .to('#marketer', { x: 20, opacity: 0, duration: 0.5, ease: 'power2.in' })
+        .to('#data-analyst', { x: -20, opacity: 0, duration: 0.5, ease: 'power2.in' }, '<')
+         .to({}, { duration: 0.5 }) // Hold Set 3
+
+        // === ENDFRAME TRANSITION ===
+        // Simultaneously: Logo/CopyBlock enter, "and" animates out, center-box resizes.
+        // 152px keeps the same proportional shrink (~80% of resting height) as the
+        // 600 build's 524->418 resize.
+         .to('.and-layer', { scale: 0, opacity: 0, duration: 0.5, ease: 'back.in(1.4)' }, '-=0.5') 
+        .fromTo('#logo', { y: -30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: 'power2.out' })
+        .fromTo('#endframe-copyblock', { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: 'power2.out' }, '<')
+        // .to('#center-box', { height: 152, duration: 0.8, ease: 'power2.inOut' }, '<')
+
+        // CTA 1: "Add your and" + Arrow
+        .fromTo('#add-your-and', { y: 15, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: 'power2.out' }, '-=0.1')
+        .fromTo('#endframe-arrow', { scale: 0.7, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.4, ease: 'back.out(1.5)' }, '<')
+        .to({}, { duration: 1 }) // Hold CTA 1
+
+        // CTA 2 Switch: "Stay unstuck"
+        .to('#add-your-and', { y: -10, opacity: 0, duration: 0.35, ease: 'power2.in' })
+        .fromTo('#stay-unstuck', { y: 15, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: 'power2.out' }, '-=0.1')
+        .to('#endframe-arrow', { x: 3, y: -3, duration: 0.18, yoyo: true, repeat: 3, ease: 'power1.inOut' }, '+=0.2');
+    }
+
+    // Banner Click Tag
+    document.getElementById('banner').addEventListener('click', function() {
+      window.open(window.clickTag);
+    });
+
+    /* ====================================================
+       DEV SCRUBBER CONTROLS (Set DEV_MODE = true to test)
+       ==================================================== */
+    const DEV_MODE = false;
+
+    function initDevScrubber() {
+      (function () {
+        document.body.style.flexDirection = 'column';
+        document.body.style.justifyContent = 'center';
+        document.body.style.alignItems = 'center';
+
+        const devBox = document.createElement('div');
+        devBox.id = 'dev-scrubber';
+        devBox.innerHTML = `
+          <style>
+            #dev-scrubber {
+              width: 300px;
+              margin-top: 14px;
+              padding: 10px;
+              background: #1a1a1a;
+              border-radius: 6px;
+              box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+              font-family: monospace;
+              font-size: 10px;
+              color: #00e5ff;
+              box-sizing: border-box;
+            }
+            .dev-row {
+              display: flex;
+              align-items: center;
+              gap: 8px;
+            }
+            .dev-row + .dev-row {
+              margin-top: 8px;
+            }
+            #dev-slider {
+              flex: 1;
+              min-width: 0;
+              cursor: pointer;
+              accent-color: #ff3b5c;
+            }
+            .dev-btn {
+              background: #333;
+              color: #fff;
+              border: 1px solid #444;
+              padding: 4px 8px;
+              border-radius: 4px;
+              cursor: pointer;
+              font-family: monospace;
+              font-size: 10px;
+              transition: background 0.15s;
+            }
+            .dev-btn:hover {
+              background: #ff3b5c;
+              border-color: #ff3b5c;
+            }
+            #dev-play {
+              width: 52px;
+              text-align: center;
+              padding-left: 0;
+              padding-right: 0;
+              flex-shrink: 0;
+            }
+            #dev-time {
+              width: 75px;
+              text-align: right;
+              white-space: nowrap;
+              flex-shrink: 0;
+            }
+          </style>
+          <div class="dev-row">
+            <button id="dev-play" class="dev-btn">Pause</button>
+            <input id="dev-slider" type="range" min="0" max="1" step="0.001" value="0">
+            <span id="dev-time">0.0s / 0.0s</span>
+          </div>
+          <div class="dev-row" style="justify-content: space-between;">
+            <button class="dev-btn" data-seek="0.9">Set 1</button>
+            <button class="dev-btn" data-seek="4.2">Set 2</button>
+            <button class="dev-btn" data-seek="7.5">Set 3</button>
+            <button class="dev-btn" data-seek="10.8">End</button>
+          </div>
+        `;
+
+        const banner = document.getElementById('banner');
+        if (banner && banner.parentNode) {
+          banner.parentNode.insertBefore(devBox, banner.nextSibling);
+        } else {
+          document.body.appendChild(devBox);
+        }
+
+        const slider = document.getElementById('dev-slider');
+        const playBtn = document.getElementById('dev-play');
+        const timeDisplay = document.getElementById('dev-time');
+
+        playBtn.addEventListener('click', () => {
+          if (mainTl.progress() === 1) {
+            mainTl.restart();
+            playBtn.innerText = 'Pause';
+          } else if (mainTl.paused()) {
+            mainTl.play();
+            playBtn.innerText = 'Pause';
+          } else {
+            mainTl.pause();
+            playBtn.innerText = 'Play';
+          }
+        });
+
+        slider.addEventListener('input', () => {
+          mainTl.progress(parseFloat(slider.value)).pause();
+          playBtn.innerText = mainTl.progress() === 1 ? 'Replay' : 'Play';
+        });
+
+        devBox.querySelectorAll('[data-seek]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const time = parseFloat(btn.getAttribute('data-seek'));
+            mainTl.seek(time).pause();
+            playBtn.innerText = 'Play';
+          });
+        });
+
+        mainTl.eventCallback('onUpdate', () => {
+          if (!slider.matches(':active')) {
+            slider.value = mainTl.progress();
+          }
+          const cur = mainTl.time().toFixed(1);
+          const dur = mainTl.duration().toFixed(1);
+          timeDisplay.innerText = `${cur}s / ${dur}s`;
+          
+          if (mainTl.progress() < 1 && playBtn.innerText === 'Replay') {
+            playBtn.innerText = 'Play';
+          }
+        });
+
+        mainTl.eventCallback('onComplete', () => {
+          playBtn.innerText = 'Replay';
+        });
+      })();
+    }
+
+    // ----------------------------------------------------
+    // Boot sequence: place each arrow against its own word, then build and
+    // let the timeline play.
+    // ----------------------------------------------------
+    function initBanner() {
+      placeArrows();
+      buildTimeline();
+      if (DEV_MODE) initDevScrubber();
+    }
+
+    initBanner();
+
+    // ----------------------------------------------------
+    // POSTER MODE (staging preview only)
+    // staging.html loads this file with ?poster to hold the final frame as a
+    // still thumbnail. Trafficked builds are served without a query string,
+    // so this block never runs in the ad server.
+    // ----------------------------------------------------
+    if (/(^|[?&])poster\b/.test(location.search) && typeof mainTl !== 'undefined' && mainTl) {
+      mainTl.progress(1).pause();
+    }
+  </script>
+</body>
+</html>

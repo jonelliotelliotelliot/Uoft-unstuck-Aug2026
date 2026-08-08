@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Client Preview Staging | UofT SCS Banners</title>
+  <style>
+    /* ====================================================
+       1. Theme tokens
+       Neutral greys carry the UI so the chrome never competes
+       with the creative. One accent (UofT navy / a lighter
+       azure in dark) is used only for interactive emphasis.
+       ==================================================== */
+    :root {
+      --bg-body: #f7f7f8;
+      --bg-card: #ffffff;
+      --bg-stage: #eceef1;
+      --bg-subtle: #f2f3f5;
+      --text-main: #17181c;
+      --text-muted: #6a6f77;
+      --border-color: #e2e4e8;
+      --border-strong: #cdd1d7;
+      --accent: #002a5c;
+      --accent-hover: #013c80;
+      --accent-contrast: #ffffff;
+      --accent-soft: rgba(0, 42, 92, 0.08);
+      --focus-ring: rgba(0, 42, 92, 0.35);
+      --scrim: rgba(23, 24, 28, 0.24);
+      --scrim-hover: rgba(23, 24, 28, 0.06);
+      --card-shadow: 0 1px 2px rgba(16, 18, 22, 0.04), 0 6px 16px rgba(16, 18, 22, 0.06);
+    }
+
+    [data-theme="dark"] {
+      --bg-body: #0d0f12;
+      --bg-card: #16191e;
+      --bg-stage: #0a0c0f;
+      --bg-subtle: #1c2027;
+      --text-main: #eceef1;
+      --text-muted: #939aa4;
+      --border-color: #262b33;
+      --border-strong: #39404a;
+      --accent: #7fb2ff;
+      --accent-hover: #a3c8ff;
+      --accent-contrast: #0d0f12;
+      --accent-soft: rgba(127, 178, 255, 0.14);
+      --focus-ring: rgba(127, 178, 255, 0.45);
+      --scrim: rgba(6, 8, 11, 0.3);
+      --scrim-hover: rgba(6, 8, 11, 0.08);
+      --card-shadow: 0 1px 2px rgba(0, 0, 0, 0.5), 0 8px 24px rgba(0, 0, 0, 0.35);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html { color-scheme: light; }
+    [data-theme="dark"] { color-scheme: dark; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-body);
+      color: var(--text-main);
+      padding: 0 24px 72px;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    :focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    /* ====================================================
+       2. Header & controls
+       ==================================================== */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 200;
+      background-color: color-mix(in srgb, var(--bg-body) 94%, transparent);
+      backdrop-filter: saturate(1.6) blur(10px);
+      -webkit-backdrop-filter: saturate(1.6) blur(10px);
+      border-bottom: 1px solid var(--border-color);
+      margin: 0 -24px 40px;
+      padding: 18px 24px;
+    }
+
+    .header-inner {
+      max-width: 790px;
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .brand-title h1 {
+      font-size: 17px;
+      font-weight: 650;
+      letter-spacing: -0.01em;
+    }
+
+    .brand-title p {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .controls-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Buttons ------------------------------------------- */
+    .btn {
+      background-color: var(--bg-card);
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+      padding: 7px 13px;
+      font: inherit;
+      font-size: 13px;
+      font-weight: 550;
+      line-height: 1.2;
+      border-radius: 7px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .btn:hover {
+      background-color: var(--bg-subtle);
+      border-color: var(--border-strong);
+    }
+
+    .btn:active { transform: translateY(0.5px); }
+
+    .btn-primary {
+      background-color: var(--accent);
+      color: var(--accent-contrast);
+      border-color: transparent;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--accent-hover);
+      border-color: transparent;
+      color: var(--accent-contrast);
+    }
+
+    .btn-quiet {
+      background: none;
+      border-color: transparent;
+      color: var(--text-muted);
+      padding: 5px 9px;
+      font-size: 12px;
+    }
+
+    .btn-quiet:hover {
+      background-color: var(--bg-subtle);
+      border-color: var(--border-color);
+      color: var(--text-main);
+    }
+
+    /* Segmented theme switch ---------------------------- */
+    .theme-toggle-group {
+      display: flex;
+      gap: 2px;
+      padding: 2px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      background-color: var(--bg-subtle);
+    }
+
+    .theme-btn {
+      border: none;
+      background: none;
+      padding: 5px 11px;
+      font: inherit;
+      font-size: 12px;
+      font-weight: 550;
+      border-radius: 6px;
+      cursor: pointer;
+      color: var(--text-muted);
+      transition: background-color 0.15s ease, color 0.15s ease;
+    }
+
+    .theme-btn:hover { color: var(--text-main); }
+
+    .theme-btn[aria-pressed="true"] {
+      background-color: var(--bg-card);
+      color: var(--text-main);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+    }
+
+    /* ====================================================
+       3. Layout & sections
+       ==================================================== */
+    main {
+      max-width: 790px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 56px;
+    }
+
+    .campaign-section {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .section-header h2 {
+      font-size: 15px;
+      font-weight: 650;
+      letter-spacing: -0.01em;
+    }
+
+    .section-header .tag {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      background-color: var(--accent-soft);
+      color: var(--accent);
+      padding: 2px 7px;
+      border-radius: 999px;
+    }
+
+    .banner-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 24px;
+      align-items: flex-start;
+    }
+
+    .banner-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 12px;
+      box-shadow: var(--card-shadow);
+      display: flex;
+      flex-direction: column;
+      max-width: 100%; /* Prevents card from overflowing mobile viewports */
+      transition: background-color 0.2s ease, border-color 0.2s ease;
+    }
+
+    .banner-card-header {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+      padding: 0 2px;
+    }
+
+    .size-badge {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      color: var(--text-muted);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .size-badge strong {
+      color: var(--text-main);
+      font-weight: 600;
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 2px;
+      align-items: center;
+    }
+
+    /* ====================================================
+       4. Preview stage & poster overlay
+       ==================================================== */
+    .preview-stage {
+      width: 100%;
+      padding: 14px;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      background-color: var(--bg-stage);
+      transition: background-color 0.2s ease, border-color 0.2s ease;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden; /* Clips any sub-pixel overflow during transitions */
+    }
+
+    .iframe-wrapper {
+      position: relative;
+      border: 1px solid var(--border-strong);
+      border-radius: 2px;
+      overflow: hidden;
+      box-shadow: 0 1px 6px rgba(0, 0, 0, 0.14);
+      background-color: var(--bg-subtle); /* Neutral until the creative paints */
+      transform-origin: center center;
+      transition: transform 0.15s ease-out, margin 0.15s ease-out;
+      flex-shrink: 0;
+    }
+
+    iframe {
+      border: none;
+      display: block;
+    }
+
+    /* Poster overlay: a light scrim over the creative's own end frame */
+    .poster-overlay {
+      position: absolute;
+      inset: 0;
+      background-color: var(--scrim);
+      border: none;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+      cursor: pointer;
+      transition: opacity 0.25s ease, visibility 0.25s ease, background-color 0.2s ease;
+    }
+
+    .poster-overlay:hover { background-color: var(--scrim-hover); }
+
+    .poster-overlay.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .play-btn-circle {
+      width: 44px;
+      height: 44px;
+      background-color: rgba(255, 255, 255, 0.94);
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+      transition: transform 0.18s ease, background-color 0.18s ease;
+    }
+
+    .play-btn-circle svg {
+      fill: #17181c;
+      margin-left: 3px;
+    }
+
+    .poster-overlay:hover .play-btn-circle,
+    .poster-overlay:focus-visible .play-btn-circle {
+      transform: scale(1.08);
+      background-color: #ffffff;
+    }
+
+    /* Leaderboards are only 90px tall - shrink the affordance to fit */
+    .iframe-wrapper[data-height="90"] .play-btn-circle {
+      width: 34px;
+      height: 34px;
+    }
+
+    .iframe-wrapper[data-height="90"] .play-btn-circle svg {
+      width: 15px;
+      height: 15px;
+    }
+
+    footer {
+      max-width: 790px;
+      margin: 64px auto 0;
+      padding-top: 20px;
+      border-top: 1px solid var(--border-color);
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      * { transition-duration: 0.01ms !important; }
+    }
+
+    @media (max-width: 640px) {
+      body { padding: 0 14px 48px; }
+      header { margin: 0 -14px 28px; padding: 14px; }
+      .banner-grid { gap: 18px; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-inner">
+      <div class="brand-title">
+        <h1>University of Toronto SCS — Campaign Staging</h1>
+        <p>HTML5 display banner suite · client preview</p>
+      </div>
+
+      <div class="controls-toolbar">
+        <button class="btn btn-primary" onclick="playAllBanners()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="6 4 20 12 6 20"/></svg>
+          Play all
+        </button>
+        <button class="btn" onclick="resetAllBanners()">Reset</button>
+
+        <!-- Global theme switcher -->
+        <div class="theme-toggle-group" role="group" aria-label="Colour theme">
+          <button class="theme-btn" id="btn-theme-light" aria-pressed="false" onclick="setTheme('light')">Light</button>
+          <button class="theme-btn" id="btn-theme-dark" aria-pressed="false" onclick="setTheme('dark')">Dark</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main id="staging-container">
+    <!-- Dynamic Campaign Sections Generated via JS -->
+  </main>
+
+  <footer>
+    Internal client preview environment &bull; Built for Google Campaign Manager / DV360
+  </footer>
+
+  <script>
+    /* ====================================================
+       5. Campaign Configuration (DRY Data Engine)
+       ==================================================== */
+    const CAMPAIGN_SETS = [
+      {
+        title: "Concept A — Professional Series",
+        tag: "Rev 1",
+        banners: [
+          {
+            label: "Leaderboard",
+            width: 728,
+            height: 90,
+            folder: "Uoft-unstuck-Aug2026-professional-728x90",
+            fullWidth: true
+          },
+          {
+            label: "Big-Box",
+            width: 300,
+            height: 250,
+            folder: "Uoft-unstuck-Aug2026-professional-300x250"
+          },
+          {
+            label: "Half-Page",
+            width: 300,
+            height: 600,
+            folder: "Uoft-unstuck-Aug2026-professional-300x600"
+          }
+        ]
+      },
+      {
+        title: "Concept B — Brand Series",
+        tag: "Rev 1",
+        banners: [
+          {
+            label: "Leaderboard",
+            width: 728,
+            height: 90,
+            folder: "Uoft-unstuck-Aug2026-brand-728x90",
+            fullWidth: true
+          },
+          {
+            label: "Big-Box",
+            width: 300,
+            height: 250,
+            folder: "Uoft-unstuck-Aug2026-brand-300x250"
+          },
+          {
+            label: "Half-Page",
+            width: 300,
+            height: 600,
+            folder: "Uoft-unstuck-Aug2026-brand-300x600"
+          }
+        ]
+      }
+    ];
+
+    /* ====================================================
+       6. Dynamic Renderer
+       Each iframe loads immediately with ?poster, which holds the
+       creative's own GSAP timeline on its final frame. That end
+       frame *is* the poster image - no separate thumbnail assets.
+       ==================================================== */
+    function renderStagingArea() {
+      const container = document.getElementById('staging-container');
+      container.innerHTML = '';
+
+      CAMPAIGN_SETS.forEach((set, setIndex) => {
+        if (!set.banners || set.banners.length === 0) return;
+
+        const section = document.createElement('section');
+        section.className = 'campaign-section';
+
+        section.innerHTML = `
+          <div class="section-header">
+            <h2>${set.title}</h2>
+            <span class="tag">${set.tag}</span>
+          </div>
+          <div class="banner-grid" id="grid-set-${setIndex}"></div>
+        `;
+
+        container.appendChild(section);
+        const grid = section.querySelector(`#grid-set-${setIndex}`);
+
+        set.banners.forEach((banner, bIndex) => {
+          const filePath = `${banner.folder}/${banner.folder}.html`;
+          const frameId = `iframe-${setIndex}-${bIndex}`;
+
+          const card = document.createElement('article');
+          card.className = 'banner-card';
+          if (banner.fullWidth) {
+            card.style.width = '100%';
+            card.style.maxWidth = `${banner.width + 56}px`;
+          }
+
+          card.innerHTML = `
+            <div class="banner-card-header">
+              <span class="size-badge"><strong>${banner.width}×${banner.height}</strong> ${banner.label}</span>
+              <div class="card-actions">
+                <button class="btn btn-quiet" id="play-${frameId}" onclick="playSingleBanner('${frameId}')">Play</button>
+                <a href="${filePath}" target="_blank" rel="noopener" class="btn btn-quiet">Open&nbsp;↗</a>
+              </div>
+            </div>
+            <div class="preview-stage">
+              <div class="iframe-wrapper" data-width="${banner.width}" data-height="${banner.height}" style="width: ${banner.width}px; height: ${banner.height}px;">
+                <iframe id="${frameId}" data-src="${filePath}" src="${filePath}?poster=1"
+                        title="${banner.width}×${banner.height} ${banner.label} — final frame"
+                        width="${banner.width}" height="${banner.height}" loading="lazy" scrolling="no"></iframe>
+
+                <!-- Poster scrim sits over the creative's own end frame -->
+                <button type="button" class="poster-overlay" id="overlay-${frameId}"
+                        aria-label="Play the ${banner.width}×${banner.height} ${banner.label} animation"
+                        onclick="playSingleBanner('${frameId}')">
+                  <span class="play-btn-circle">
+                    <svg width="19" height="19" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="6 4 20 12 6 20"/></svg>
+                  </span>
+                </button>
+              </div>
+            </div>
+          `;
+
+          grid.appendChild(card);
+        });
+      });
+
+      // Recalculate scaling immediately after rendering DOM nodes
+      scaleBanners();
+    }
+
+    /* ====================================================
+       7. Responsive Proportional Auto-Scaling Engine
+       ==================================================== */
+    function scaleBanners() {
+      document.querySelectorAll('.preview-stage').forEach(stage => {
+        const wrapper = stage.querySelector('.iframe-wrapper');
+        if (!wrapper) return;
+
+        const nativeWidth = parseFloat(wrapper.dataset.width);
+        const nativeHeight = parseFloat(wrapper.dataset.height);
+
+        // Measure available inner width of the stage minus padding (14px * 2 = 28px)
+        const availableWidth = stage.clientWidth - 28;
+
+        if (availableWidth < nativeWidth && availableWidth > 0) {
+          const scale = availableWidth / nativeWidth;
+
+          // Apply transform scale
+          wrapper.style.transform = `scale(${scale})`;
+
+          // Apply negative margins to collapse layout whitespace around scaled element
+          const verticalMargin = -((nativeHeight * (1 - scale)) / 2);
+          const horizontalMargin = -((nativeWidth * (1 - scale)) / 2);
+
+          wrapper.style.margin = `${verticalMargin}px ${horizontalMargin}px`;
+        } else {
+          wrapper.style.transform = 'none';
+          wrapper.style.margin = '0';
+        }
+      });
+    }
+
+    // Dynamic Observer & Window Listener
+    const resizeObserver = new ResizeObserver(() => scaleBanners());
+
+    /* ====================================================
+       8. Playback & Theme Logic
+       ==================================================== */
+    // Cache-busting token forces a genuine reload when replaying the same URL.
+    function playSingleBanner(frameId) {
+      const iframe = document.getElementById(frameId);
+      const overlay = document.getElementById(`overlay-${frameId}`);
+      const playBtn = document.getElementById(`play-${frameId}`);
+
+      if (iframe) {
+        iframe.src = `${iframe.dataset.src}?t=${Date.now()}`;
+      }
+      if (overlay) overlay.classList.add('hidden');
+      if (playBtn) playBtn.textContent = 'Replay';
+    }
+
+    function playAllBanners() {
+      document.querySelectorAll('.iframe-wrapper iframe').forEach(iframe => {
+        playSingleBanner(iframe.id);
+      });
+    }
+
+    // Return every banner to its end-frame poster state.
+    function resetAllBanners() {
+      document.querySelectorAll('.iframe-wrapper iframe').forEach(iframe => {
+        iframe.src = `${iframe.dataset.src}?poster=1&t=${Date.now()}`;
+        const overlay = document.getElementById(`overlay-${iframe.id}`);
+        const playBtn = document.getElementById(`play-${iframe.id}`);
+        if (overlay) overlay.classList.remove('hidden');
+        if (playBtn) playBtn.textContent = 'Play';
+      });
+    }
+
+    function setTheme(theme, persist = true) {
+      document.documentElement.setAttribute('data-theme', theme);
+      document.getElementById('btn-theme-light').setAttribute('aria-pressed', String(theme === 'light'));
+      document.getElementById('btn-theme-dark').setAttribute('aria-pressed', String(theme === 'dark'));
+      if (persist) {
+        try { localStorage.setItem('staging-theme', theme); } catch (e) { /* private mode */ }
+      }
+    }
+
+    // Stored choice wins; otherwise follow the OS setting.
+    function initTheme() {
+      let stored = null;
+      try { stored = localStorage.getItem('staging-theme'); } catch (e) { /* private mode */ }
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      setTheme(stored || (prefersDark ? 'dark' : 'light'), false);
+    }
+
+    // Initial Execution & Event Registration
+    initTheme();
+    renderStagingArea();
+    document.querySelectorAll('.preview-stage').forEach(stage => resizeObserver.observe(stage));
+    window.addEventListener('resize', scaleBanners);
+  </script>
+</body>
+</html>

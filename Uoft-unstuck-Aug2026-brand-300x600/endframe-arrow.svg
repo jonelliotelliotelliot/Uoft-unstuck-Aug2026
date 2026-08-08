@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_2" data-name="Layer 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 1200">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: none;
+      }
+
+      .cls-2 {
+        fill: #ef5356;
+      }
+    </style>
+  </defs>
+  <g id="Logo_Copy" data-name="Logo &amp;amp; Copy">
+    <g id="Background">
+      <rect class="cls-1" width="600" height="1200"/>
+    </g>
+    <polygon class="cls-2" points="158.83 900.11 158.83 925.98 165.15 925.98 165.15 895.84 165.15 889.52 158.83 889.52 128.7 889.52 128.7 895.84 154.16 895.84 128.59 921.41 133.05 925.89 158.83 900.11"/>
+  </g>
+</svg>

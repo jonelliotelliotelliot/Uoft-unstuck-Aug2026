@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="ad.size" content="width=300,height=600">
+  <title>UofT SCS - 300x600 HTML5 Banner</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script type="text/javascript">var clickTag = "https://learn.utoronto.ca";</script>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* White body so banner edges are clearly visible */
+    body {
+      background-color: #ffffff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      font-family: Arial, sans-serif;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    /* 300x600 Canvas Container */
+    #banner {
+      position: relative;
+      width: 300px;
+      height: 600px;
+      background-color: #00b188;
+      overflow: hidden;
+      cursor: pointer;
+    }
+
+    /* Full-canvas stacked layers */
+    .layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 300px;
+      height: 600px;
+      pointer-events: none;
+      opacity: 0;
+    }
+
+    /* Logo is persistent */
+    #logo {
+      opacity: 1;
+      z-index: 10;
+    }
+
+    /* Frame 1: Progress Bar */
+    #progress-container {
+      position: absolute;
+      top: 360px;
+      left: 50px;
+      width: 200px;
+      height: 34px;
+      background-color: #ffffff;
+      z-index: 5;
+      opacity: 0;
+    }
+
+    #progress-fill {
+      width: 0%;
+      height: 100%;
+      background-color: #ba4a9a;
+    }
+
+    /* Frame 2: Programmatic Spinning Loader */
+    #loader-container {
+      position: absolute;
+      top: 337px;
+      left: 105px;
+      width: 90px;
+      height: 90px;
+      z-index: 5;
+      opacity: 0;
+    }
+
+    #loader-svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .loader-dash {
+      fill: #ba4a9a;
+      transition: fill 0.12s ease;
+    }
+
+    .loader-dash.active {
+      fill: #ffffff;
+    }
+
+    /* Frame 3: Upgrade Button & Arrow Cursor */
+    #button {
+      position: absolute;
+      top: 346px;
+      left: 82.5px;
+      width: 135px;
+      height: 51.5px;
+      z-index: 6;
+      opacity: 0;
+      transform-origin: center center;
+    }
+
+    #arrow-cursor {
+      position: absolute;
+      top: 385px;
+      left: 90px;
+      width: 32px;
+      height: 32px;
+      z-index: 7;
+      opacity: 0;
+      transform-origin: top right;
+    }
+
+    /* Lines scale transition origin */
+    #lines {
+      transform-origin: center center;
+    }
+
+    #endframe-arrow {
+      transform-origin: bottom left;
+
+    }
+  </style>
+</head>
+<body>
+
+  <div id="banner">
+    <!-- Persistent Logo Layer -->
+    <img id="logo" class="layer" src="logo.svg" alt="UofT SCS Logo">
+
+    <!-- Frame 1: Headline 1 + Progress Bar -->
+    <img id="headline1" class="layer" src="headline1.svg" alt="Your software updates itself.">
+    <div id="progress-container">
+      <div id="progress-fill"></div>
+    </div>
+
+    <!-- Frame 2: Headline 2 + Spinning Loader -->
+    <img id="headline2" class="layer" src="headline2.svg" alt="Your judgment doesn't.">
+    <div id="loader-container">
+      <svg id="loader-svg" viewBox="0 0 200 200"></svg>
+    </div>
+
+    <!-- Frame 3: Headline 3 + Upgrade Button + Cursor Arrow -->
+    <img id="headline3" class="layer" src="headline3.svg" alt="That's what learning is for.">
+    <img id="button" src="button.svg" alt="Upgrade Button">
+    <img id="arrow-cursor" src="arrow.svg" alt="Arrow Cursor">
+
+    <!-- Frame 4 & 5: Background Lines + Endframe Text + CTAs -->
+    <img id="lines" class="layer" src="lines.svg" alt="Background Lines">
+    <img id="endframe-headline" class="layer" src="endframe-headline.svg" alt="Courses that build the thinking no tool can do for you.">
+    <img id="endframe-cta1" class="layer" src="endframe-cta-1.svg" alt="Update the Human">
+    <img id="endframe-cta2" class="layer" src="endframe-cta-2.svg" alt="Stay Unstuck">
+    <img id="endframe-arrow" class="layer" src="endframe-arrow.svg" alt="CTA Arrow">
+  </div>
+
+  <script>
+    // ----------------------------------------------------
+    // 1. Build Programmatic 12-Dash Spinner
+    // ----------------------------------------------------
+    const loaderSvg = document.getElementById('loader-svg');
+    const totalDashes = 12;
+    const dashes = [];
+
+    for (let i = 0; i < totalDashes; i++) {
+      const angle = (i * 360 / totalDashes) - 90;
+      const rInner = 52;
+      const rOuter = 88;
+      const widthAngle = 11.5;
+
+      const a1 = ((angle - widthAngle) * Math.PI) / 180;
+      const a2 = ((angle + widthAngle) * Math.PI) / 180;
+
+      const x1 = 100 + rInner * Math.cos(a1);
+      const y1 = 100 + rInner * Math.sin(a1);
+      const x2 = 100 + rOuter * Math.cos(a1);
+      const y2 = 100 + rOuter * Math.sin(a1);
+      const x3 = 100 + rOuter * Math.cos(a2);
+      const y3 = 100 + rOuter * Math.sin(a2);
+      const x4 = 100 + rInner * Math.cos(a2);
+      const y4 = 100 + rInner * Math.sin(a2);
+
+      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      path.setAttribute('d', `M ${x1} ${y1} L ${x2} ${y2} L ${x3} ${y3} L ${x4} ${y4} Z`);
+      path.setAttribute('class', 'loader-dash');
+      loaderSvg.appendChild(path);
+      dashes.push(path);
+    }
+
+    let activeIndex = 0;
+    let loaderInterval = null;
+
+    function stepLoader() {
+      dashes.forEach((dash, idx) => {
+        const diff = (activeIndex - idx + totalDashes) % totalDashes;
+        if (diff >= 0 && diff < 3) {
+          dash.classList.add('active');
+        } else {
+          dash.classList.remove('active');
+        }
+      });
+      activeIndex = (activeIndex + 1) % totalDashes;
+    }
+
+    function startLoader() {
+      clearInterval(loaderInterval);
+      loaderInterval = setInterval(stepLoader, 90);
+    }
+
+    function stopLoader() {
+      clearInterval(loaderInterval);
+    }
+
+    // ----------------------------------------------------
+    // 2. Main GSAP Animation Timeline (Single Run - No Loop)
+    // ----------------------------------------------------
+    const mainTl = gsap.timeline({ repeat: 0 });
+
+    mainTl
+      // === FRAME 1: Headline 1 + Progress Fill ===
+      .fromTo('#headline1', { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, ease: 'power3.out' })
+      .to('#progress-container', { opacity: 1, duration: 0.3 }, '-=0.3')
+      .to('#progress-fill', { width: '100%', duration: 1.6, ease: 'power1.inOut' })
+      .to({}, { duration: 0.8 }) // Hold Frame 1
+
+      // Exit Frame 1
+      .to('#headline1', { y: -15, opacity: 0, duration: 0.4, ease: 'power2.in' })
+      .to('#progress-container', { opacity: 0, duration: 0.3 }, '<')
+
+      // === FRAME 2: Headline 2 + Spinning Loader ===
+      .call(startLoader)
+      .fromTo('#headline2', { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: 'power2.out' })
+      .to('#loader-container', { opacity: 1, duration: 0.4 }, '-=0.3')
+      .to({}, { duration: 1.8 }) // Hold Frame 2
+
+      // Exit Frame 2
+      .to('#headline2', { y: -15, opacity: 0, duration: 0.4, ease: 'power2.in' })
+      .to('#loader-container', { opacity: 0, duration: 0.3 }, '<')
+      .call(stopLoader, null, '<')
+
+      // === FRAME 3: Headline 3 + Upgrade Button + Cursor Click ===
+      .fromTo('#headline3', { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: 'power2.out' })
+      .fromTo('#button', { scale: 0 }, { scale: 1, opacity: 1, duration: 0.5, ease: 'back.out(1.4)' }, '-=0.2')
+      
+      // Cursor slides in like a mouse pointer
+      .fromTo('#arrow-cursor', 
+        { x: -50, y: 70, opacity: 0 }, 
+        { x: 0, y: 0, opacity: 1, duration: 0.7, ease: 'power2.out' }, 
+        '+=0.1'
+      )
+      // Cursor performs "Click" press
+      .to('#arrow-cursor', { scale: 0.82, duration: 0.12, ease: 'power1.in' })
+      // Button reacts to click
+      .to('#button', { scale: 0.94, duration: 0.1, ease: 'power1.in' }, '<')
+      .to('#arrow-cursor', { scale: 1, duration: 0.18, ease: 'power1.out' })
+      .to('#button', { scale: 1, duration: 0.2, ease: 'back.out(2)' }, '<')
+      .to({}, { duration: 0.2 }) // Hold Frame 3
+
+      // Exit Frame 3
+      .to(['#headline3', '#button', '#arrow-cursor'], { opacity: 0, duration: 0.4, ease: 'power2.in' })
+
+      // === FRAME 4: Background Lines + Endframe Headline + CTA 1 ("UPDATE THE HUMAN") ===
+      .fromTo('#lines', 
+        { scale: 1.35, opacity: 0 }, 
+        { scale: 1, opacity: 1, duration: 0.8, ease: 'power2.out' }
+      )
+      .fromTo('#endframe-headline', 
+        { y: 20, opacity: 0 }, 
+        { y: 0, opacity: 1, duration: 0.6, ease: 'power2.out' }, 
+        '-=0.4'
+      )
+      .fromTo('#endframe-cta1', 
+        { y: 15, opacity: 0 }, 
+        { y: 0, opacity: 1, duration: 0.5, ease: 'power2.out' }, 
+        '-=0.2'
+      )
+      .fromTo('#endframe-arrow', 
+        { scale: 0.7, opacity: 0 }, 
+        { scale: 1, opacity: 1, duration: 0.4, ease: 'back.out(1.5)' }, 
+        '<'
+      )
+      .to({}, { duration: 1.5 }) // Hold Frame 4
+
+      // === FRAME 5: CTA Switch to "STAY UNSTUCK" ===
+      .to('#endframe-cta1', { y: -10, opacity: 0, duration: 0.35, ease: 'power2.in' })
+      .fromTo('#endframe-cta2', 
+        { y: 15, opacity: 0 }, 
+        { y: 0, opacity: 1, duration: 0.5, ease: 'power2.out' }, 
+        '-=0.1'
+      )
+      .to('#endframe-arrow', { x: 3, y: -3, duration: 0.18, yoyo: true, repeat: 3, ease: 'power1.inOut' }, '+=0.3');
+
+    // Standard Banner Click Tag
+    document.getElementById('banner').addEventListener('click', function() {
+      window.open(window.clickTag);
+    });
+
+
+ /* ====================================================
+   DEV SCRUBBER CONTROLS (Remove or set DEV_MODE = false)
+   ==================================================== */
+    const DEV_MODE = false;
+
+    if (DEV_MODE) {
+      (function initDevScrubber() {
+        // Set flex layout to stack vertically centered below the creative
+        document.body.style.flexDirection = 'column';
+        document.body.style.justifyContent = 'center';
+        document.body.style.alignItems = 'center';
+
+        // 1. Inject Control Panel HTML & CSS
+        const devBox = document.createElement('div');
+        devBox.id = 'dev-scrubber';
+        devBox.innerHTML = `
+          <style>
+            #dev-scrubber {
+              width: 300px;
+              margin-top: 14px;
+              padding: 10px;
+              background: #1a1a1a;
+              border-radius: 6px;
+              box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+              font-family: monospace;
+              font-size: 10px;
+              color: #00e5ff;
+              box-sizing: border-box;
+            }
+            .dev-row {
+              display: flex;
+              align-items: center;
+              gap: 8px;
+            }
+            .dev-row + .dev-row {
+              margin-top: 8px;
+            }
+            #dev-slider {
+              flex: 1;
+              min-width: 0; /* Prevents slider flex-shrink overflow */
+              cursor: pointer;
+              accent-color: #ba4a9a;
+            }
+            .dev-btn {
+              background: #333;
+              color: #fff;
+              border: 1px solid #444;
+              padding: 4px 8px;
+              border-radius: 4px;
+              cursor: pointer;
+              font-family: monospace;
+              font-size: 10px;
+              transition: background 0.15s;
+            }
+            .dev-btn:hover {
+              background: #ba4a9a;
+              border-color: #ba4a9a;
+            }
+            #dev-play {
+              width: 52px; /* Fixed width so "Replay", "Pause", "Play" fit without shifting layout */
+              text-align: center;
+              padding-left: 0;
+              padding-right: 0;
+              flex-shrink: 0;
+            }
+            #dev-time {
+              width: 75px;
+              text-align: right;
+              white-space: nowrap; /* Prevents text from breaking onto a second line */
+              flex-shrink: 0;
+            }
+          </style>
+          <div class="dev-row">
+            <button id="dev-play" class="dev-btn">Pause</button>
+            <input id="dev-slider" type="range" min="0" max="1" step="0.001" value="0">
+            <span id="dev-time">0.0s / 0.0s</span>
+          </div>
+          <div class="dev-row" style="justify-content: space-between;">
+            <button class="dev-btn" data-seek="0">F1 (0s)</button>
+            <button class="dev-btn" data-seek="3.5">F2 (3.5s)</button>
+            <button class="dev-btn" data-seek="6.5">F3 (6.5s)</button>
+            <button class="dev-btn" data-seek="9.5">F4 (9.5s)</button>
+          </div>
+        `;
+
+        // Insert directly beneath the banner container
+        const banner = document.getElementById('banner');
+        if (banner && banner.parentNode) {
+          banner.parentNode.insertBefore(devBox, banner.nextSibling);
+        } else {
+          document.body.appendChild(devBox);
+        }
+
+        const slider = document.getElementById('dev-slider');
+        const playBtn = document.getElementById('dev-play');
+        const timeDisplay = document.getElementById('dev-time');
+
+        // 2. Smart Play / Pause / Replay Toggle
+        playBtn.addEventListener('click', () => {
+          if (mainTl.progress() === 1) {
+            // At the end -> restart from time 0
+            mainTl.restart();
+            playBtn.innerText = 'Pause';
+          } else if (mainTl.paused()) {
+            // Paused in the middle -> resume
+            mainTl.play();
+            playBtn.innerText = 'Pause';
+          } else {
+            // Playing -> pause frame
+            mainTl.pause();
+            playBtn.innerText = 'Play';
+          }
+        });
+
+        // 3. Scrub Slider
+        slider.addEventListener('input', () => {
+          mainTl.progress(parseFloat(slider.value)).pause();
+          playBtn.innerText = mainTl.progress() === 1 ? 'Replay' : 'Play';
+        });
+
+        // 4. Quick Frame Jump Buttons
+        devBox.querySelectorAll('[data-seek]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const time = parseFloat(btn.getAttribute('data-seek'));
+            mainTl.seek(time).pause();
+            playBtn.innerText = 'Play';
+          });
+        });
+
+        // 5. Sync Slider & Time Display as GSAP Plays
+        mainTl.eventCallback('onUpdate', () => {
+          if (!slider.matches(':active')) {
+            slider.value = mainTl.progress();
+          }
+          const cur = mainTl.time().toFixed(1);
+          const dur = mainTl.duration().toFixed(1);
+          timeDisplay.innerText = `${cur}s / ${dur}s`;
+          
+          if (mainTl.progress() < 1 && playBtn.innerText === 'Replay') {
+            playBtn.innerText = 'Play';
+          }
+        });
+
+        // Handle end of animation
+        mainTl.eventCallback('onComplete', () => {
+          playBtn.innerText = 'Replay';
+        });
+      })();
+    }
+
+
+    // ----------------------------------------------------
+    // POSTER MODE (staging preview only)
+    // staging.html loads this file with ?poster to hold the final frame as a
+    // still thumbnail. Trafficked builds are served without a query string,
+    // so this block never runs in the ad server.
+    // ----------------------------------------------------
+    if (/(^|[?&])poster\b/.test(location.search) && typeof mainTl !== 'undefined' && mainTl) {
+      mainTl.progress(1).pause();
+    }
+  </script>
+</body>
+</html>
