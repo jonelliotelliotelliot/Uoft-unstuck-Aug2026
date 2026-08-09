@@ -227,10 +227,12 @@
 
     mainTl
       // === FRAME 1: Headline 1 + Progress Fill ===
-      .fromTo('#headline1', { y: 15, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, ease: 'power3.out' })
+      .fromTo('#headline1', { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, ease: 'power3.out' })
       .to('#progress-container', { opacity: 1, duration: 0.3 }, '-=0.3')
       .to('#progress-fill', { width: '100%', duration: 1.6, ease: 'power1.inOut' })
-      .to({}, { duration: 0.8 })
+      .to('#progress-container,#headline1', { scale:1.05, duration:0.4, ease: 'back.in(3.5)' },"pulse-=0.4")
+      .to('#progress-container,#headline1', { scale:1, duration:0.4, ease: 'back.out(2.5)' },"pulse")
+      // .to({}, { duration: 0.2 })
 
       // Exit Frame 1
       .to('#headline1', { y: -10, opacity: 0, duration: 0.4, ease: 'power2.in' })
@@ -250,11 +252,11 @@
       // === FRAME 3: Headline 3 + Upgrade Button + Cursor Click ===
       .fromTo('#headline3', { y: 15, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: 'power2.out' })
       .fromTo('#button', { scale: 0 }, { scale: 1, opacity: 1, duration: 0.5, ease: 'back.out(1.4)' }, '-=0.2')
-      
+
       // Cursor slides in like a mouse pointer
-      .fromTo('#arrow-cursor', 
-        { x: -40, y: 40, opacity: 0 }, 
-        { x: 0, y: 0, opacity: 1, duration: 0.7, ease: 'power2.out' }, 
+      .fromTo('#arrow-cursor',
+        { x: -40, y: 40, opacity: 0 },
+        { x: 0, y: 0, opacity: 1, duration: 0.7, ease: 'power2.out' },
         '+=0.1'
       )
       // Cursor performs "Click" press
@@ -269,27 +271,27 @@
       .to(['#headline3', '#button', '#arrow-cursor'], { opacity: 0, duration: 0.4, ease: 'power2.in' })
 
       // === FRAME 4: Endframe Headline + CTA 1 ("UPDATE THE HUMAN") ===
-      .fromTo('#endframe-headline', 
-        { y: 15, opacity: 0 }, 
+      .fromTo('#endframe-headline',
+        { y: 15, opacity: 0 },
         { y: 0, opacity: 1, duration: 0.6, ease: 'power2.out' }
       )
-      .fromTo('#endframe-cta1', 
-        { y: 10, opacity: 0 }, 
-        { y: 0, opacity: 1, duration: 0.5, ease: 'power2.out' }, 
+      .fromTo('#endframe-cta1',
+        { y: 10, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.5, ease: 'power2.out' },
         '-=0.2'
       )
-      .fromTo('#endframe-arrow', 
-        { scale: 0.7, opacity: 0 }, 
-        { scale: 1, opacity: 1, duration: 0.4, ease: 'back.out(1.5)' }, 
+      .fromTo('#endframe-arrow',
+        { scale: 0.7, opacity: 0 },
+        { scale: 1, opacity: 1, duration: 0.4, ease: 'back.out(1.5)' },
         '<'
       )
       .to({}, { duration: 2.2 })
 
       // === FRAME 5: CTA Switch to "STAY UNSTUCK" ===
       .to('#endframe-cta1', { y: -10, opacity: 0, duration: 0.35, ease: 'power2.in' })
-      .fromTo('#endframe-cta2', 
-        { y: 10, opacity: 0 }, 
-        { y: 0, opacity: 1, duration: 0.5, ease: 'power2.out' }, 
+      .fromTo('#endframe-cta2',
+        { y: 10, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.5, ease: 'power2.out' },
         '-=0.1'
       )
       .to('#endframe-arrow', { x: 3, y: -3, duration: 0.18, yoyo: true, repeat: 3, ease: 'power1.inOut' }, '+=0.3');
@@ -422,7 +424,7 @@
           const cur = mainTl.time().toFixed(1);
           const dur = mainTl.duration().toFixed(1);
           timeDisplay.innerText = `${cur}s / ${dur}s`;
-          
+
           if (mainTl.progress() < 1 && playBtn.innerText === 'Replay') {
             playBtn.innerText = 'Play';
           }
