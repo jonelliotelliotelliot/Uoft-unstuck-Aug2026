@@ -415,6 +415,11 @@
           Play all
         </button>
         <button class="btn" onclick="resetAllBanners()">Reset</button>
+        <a href="packaged-files/Uoft-unstuck-Aug2026-all.zip" download class="btn"
+           title="All six creatives, each individually zipped, plus both backup image sets">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 12 5 5 5-5"/><path d="M4 20h16"/></svg>
+          Download all
+        </a>
 
         <!-- Global theme switcher -->
         <div class="theme-toggle-group" role="group" aria-label="Colour theme">
@@ -534,6 +539,8 @@
               <div class="card-actions">
                 <button class="btn btn-quiet" id="play-${frameId}" onclick="playSingleBanner('${frameId}')">Play</button>
                 <a href="${filePath}" target="_blank" rel="noopener" class="btn btn-quiet">Open&nbsp;↗</a>
+                <a href="packaged-files/${banner.folder}.zip" download class="btn btn-quiet"
+                   title="Creative files plus the 1x backup image, ready to traffic">ZIP&nbsp;↓</a>
               </div>
             </div>
             <div class="preview-stage">

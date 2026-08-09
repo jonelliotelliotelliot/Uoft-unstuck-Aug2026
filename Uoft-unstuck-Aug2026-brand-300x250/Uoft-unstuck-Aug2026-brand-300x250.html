@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="ad.size" content="width=300,height=250">
   <title>UofT SCS - 300x250 HTML5 Banner</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://s0.2mdn.net/ads/studio/cached_libs/gsap_3.11.5_min.js"></script>
   <script type="text/javascript">var clickTag = "https://learn.utoronto.ca";</script>
   <style>
     * {
@@ -307,16 +307,16 @@
 
       mainTl
         // 1. "AND" GRAPHIC SCALES IN RIGHT OFF THE BAT
-      
+
         // === SET 1: PROJECT MANAGER (in from left) & POET (in from right) ===
         // Careers enter fully visible from off-screen, sliding in much slower
-        .fromTo(['#project-manager', '#arrow-project-manager'], { x: -ENTER_OFFSET, opacity: 1 }, { x: 0, duration: 1.5, ease: 'power1.inOut' }, 'breathingRoom1')
-        .fromTo(['#poet', '#arrow-poet'], { x: ENTER_OFFSET, opacity: 1 }, { x: 0, duration: 1.5, ease: 'power1.inOut' }, 'breathingRoom1')
-        
+        .fromTo(['#project-manager', '#arrow-project-manager'], { x: -ENTER_OFFSET, opacity: 1 }, { x: 0, duration: 1.5, ease: 'power1.inOut' })
+        .fromTo(['#poet', '#arrow-poet'], { x: ENTER_OFFSET, opacity: 1 }, { x: 0, duration: 1.5, ease: 'power1.inOut' }, '<')
+
         // Arrows fade out as they get closer to their resting spots
-        .to(['#arrow-project-manager', '#arrow-poet'], { opacity: 0, duration: 0.4, ease: 'power1.out' })
+        .to(['#arrow-project-manager', '#arrow-poet'], { opacity: 0, duration: 0.4, ease: 'power1.out' },"-=0.4")
         // Inject the Echo sub-timeline
-        .add(createEchoPulse(), '-=0.1')
+        .add(createEchoPulse(), '-=0.5')
         .to({}, { duration: 0 }) // Hold Set 1
 
         // Set 1 Fades Out (continue inward on the same axis they entered on, while fading)
@@ -326,9 +326,9 @@
         // === SET 2: ACCOUNTANT (in from right) & APP BUILDER (in from left) ===
         .fromTo(['#accountant', '#arrow-accountant'], { x: ENTER_OFFSET, opacity: 1 }, { x: 0, duration: 1.5, ease: 'power1.inOut' })
         .fromTo(['#app-builder', '#arrow-app-builder'], { x: -ENTER_OFFSET, opacity: 1 }, { x: 0, duration: 1.5, ease: 'power1.inOut' }, '<')
-        .to(['#arrow-accountant', '#arrow-app-builder'], { opacity: 0, duration: 0.4, ease: 'power1.out' })
-        
-        .add(createEchoPulse(), '-=0.1')
+        .to(['#arrow-accountant', '#arrow-app-builder'], { opacity: 0, duration: 0.4, ease: 'power1.out' },"-=0.4")
+
+        .add(createEchoPulse(), '-=0.5')
         .to({}, { duration: 0 }) // Hold Set 2
 
         // Set 2 Fades Out
@@ -338,9 +338,9 @@
         // === SET 3: MARKETER (in from left) & DATA ANALYST (in from right) ===
         .fromTo(['#marketer', '#arrow-marketer'], { x: -ENTER_OFFSET, opacity: 1 }, { x: 0, duration: 1.5, ease: 'power1.inOut' })
         .fromTo(['#data-analyst', '#arrow-data-analyst'], { x: ENTER_OFFSET, opacity: 1 }, { x: 0, duration: 1.5, ease: 'power1.inOut' }, '<')
-        .to(['#arrow-marketer', '#arrow-data-analyst'], { opacity: 0, duration: 0.4, ease: 'power1.out' })
-        
-        .add(createEchoPulse(), '-=0.1')
+        .to(['#arrow-marketer', '#arrow-data-analyst'], { opacity: 0, duration: 0.4, ease: 'power1.out' },"-=0.4")
+
+        .add(createEchoPulse(), '-=0.5')
         .to({}, { duration: 0 }) // Hold Set 3
 
         // Set 3 Fades Out
@@ -352,7 +352,7 @@
         // Simultaneously: Logo/CopyBlock enter, "and" animates out, center-box resizes.
         // 152px keeps the same proportional shrink (~80% of resting height) as the
         // 600 build's 524->418 resize.
-         .to('.and-layer', { scale: 0, opacity: 0, duration: 0.5, ease: 'back.in(1.4)' }, '-=0.5') 
+         .to('.and-layer', { scale: 0, opacity: 0, duration: 0.5, ease: 'back.in(1.4)' }, '-=0.5')
         .fromTo('#logo', { y: -30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: 'power2.out' })
         .fromTo('#endframe-copyblock', { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: 'power2.out' }, '<')
         // .to('#center-box', { height: 152, duration: 0.8, ease: 'power2.inOut' }, '<')
@@ -500,7 +500,7 @@
           const cur = mainTl.time().toFixed(1);
           const dur = mainTl.duration().toFixed(1);
           timeDisplay.innerText = `${cur}s / ${dur}s`;
-          
+
           if (mainTl.progress() < 1 && playBtn.innerText === 'Replay') {
             playBtn.innerText = 'Play';
           }

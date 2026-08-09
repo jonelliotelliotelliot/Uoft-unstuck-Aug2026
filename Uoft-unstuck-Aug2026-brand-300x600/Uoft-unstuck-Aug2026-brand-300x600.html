@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="ad.size" content="width=300,height=600">
   <title>UofT SCS - 300x600 HTML5 Banner</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://s0.2mdn.net/ads/studio/cached_libs/gsap_3.11.5_min.js"></script>
   <script type="text/javascript">var clickTag = "https://learn.utoronto.ca";</script>
   <style>
     * {
@@ -155,7 +155,7 @@
     gsap.set('#small-arrow-top', { rotation: 180 }); // Pointing down towards center
     gsap.set('#small-arrow-bottom', { rotation: 0 });  // Pointing up towards center
 
- 
+
     function createEchoPulse() {
       // ===== EDITABLE SETTINGS =====
       const settings = {
@@ -247,17 +247,17 @@
 
     mainTl
       // 1. "AND" GRAPHIC SCALES IN RIGHT OFF THE BAT
-  
+
 
       // === SET 1: PROJECT MANAGER & POET ===
       // Careers enter fully visible from off-screen, sliding in much slower
-      .fromTo(['#project-manager', '#small-arrow-top'], { y: -320, opacity: 1 }, { y: 0, duration: 1.5, ease: 'power1.inOut' }, 'breathingRoom1')
-      .fromTo(['#poet', '#small-arrow-bottom'], { y: 320, opacity: 1 }, { y: 0, duration: 1.5, ease: 'power1.inOut' }, 'breathingRoom1')
-      
+      .fromTo(['#project-manager', '#small-arrow-top'], { y: -320, opacity: 1 }, { y: 0, duration: 1.5, ease: 'power1.inOut' })
+      .fromTo(['#poet', '#small-arrow-bottom'], { y: 320, opacity: 1 }, { y: 0, duration: 1.5, ease: 'power1.inOut' }, '<')
+
       // Arrows fade out as they get closer to their resting spots at the big 'and'
       .to(['#small-arrow-top', '#small-arrow-bottom'], { opacity: 0, duration: 0.4, ease: 'power1.out' })
       // Inject the Echo sub-timeline
-      .add(createEchoPulse(), '-=0.1')
+      .add(createEchoPulse(), '-=0.5')
       .to({}, { duration: 0 }) // Hold Set 1
 
       // Set 1 Fades Out (Slide inwards towards the 'and' while fading to gracefully exit)
@@ -268,8 +268,8 @@
       .fromTo(['#accountant', '#small-arrow-top'], { y: -320, opacity: 1 }, { y: 0, duration: 1.5, ease: 'power1.inOut' })
       .fromTo(['#app-builder', '#small-arrow-bottom'], { y: 320, opacity: 1 }, { y: 0, duration: 1.5, ease: 'power1.inOut' }, '<')
       .to(['#small-arrow-top', '#small-arrow-bottom'], { opacity: 0, duration: 0.4, ease: 'power1.out' })
-      
-      .add(createEchoPulse(), '-=0.1')
+
+      .add(createEchoPulse(), '-=0.5')
       .to({}, { duration: 0 }) // Hold Set 2
 
       // Set 2 Fades Out
@@ -280,18 +280,18 @@
       .fromTo(['#marketer', '#small-arrow-top'], { y: -320, opacity: 1 }, { y: 0, duration: 1.5, ease: 'power1.inOut' })
       .fromTo(['#data-analyst', '#small-arrow-bottom'], { y: 320, opacity: 1 }, { y: 0, duration: 1.5, ease: 'power1.inOut' }, '<')
       .to(['#small-arrow-top', '#small-arrow-bottom'], { opacity: 0, duration: 0.4, ease: 'power1.out' })
-      
-      .add(createEchoPulse(), '-=0.1')
+
+      .add(createEchoPulse(), '-=0.5')
       .to({}, { duration: 0 }) // Hold Set 3
 
       // Set 3 Fades Out
       .to('#marketer', { y: 20, opacity: 0, duration: 0.5, ease: 'power2.in' })
       .to('#data-analyst', { y: -20, opacity: 0, duration: 0.5, ease: 'power2.in' }, '<')
-      .to({}, { duration: 0.5 }) // Hold Set 3
+      .to({}, { duration: 0.8 }) // Hold Set 3
 
       // === ENDFRAME TRANSITION ===
       // Simultaneously: Logo/CopyBlock enter, "and" animates out, center-box resizes to 418px height
-       .to('.and-layer', { scale: 0, opacity: 0, duration: 0.5, ease: 'back.in(1.4)' }, '-=0.5') 
+       .to('.and-layer', { scale: 0, opacity: 0, duration: 0.5, ease: 'back.in(1.4)' }, '-=0.5')
       .fromTo('#logo', { y: -30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: 'power2.out' })
       .fromTo('#endframe-copyblock', { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: 'power2.out' }, '<')
       .to('#center-box', { height: 418, duration: 0.8, ease: 'power2.inOut' }, '<')
@@ -438,7 +438,7 @@
           const cur = mainTl.time().toFixed(1);
           const dur = mainTl.duration().toFixed(1);
           timeDisplay.innerText = `${cur}s / ${dur}s`;
-          
+
           if (mainTl.progress() < 1 && playBtn.innerText === 'Replay') {
             playBtn.innerText = 'Play';
           }
