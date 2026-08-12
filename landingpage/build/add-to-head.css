@@ -1,0 +1,293 @@
+/* ==========================================================================
+   UofT SCS — "Add your and / Stay unstuck" landing page header
+   --------------------------------------------------------------------------
+   Replaces the existing .header-gif block on /oep (brick--id--2429).
+
+   HOW TO INSTALL
+   1. Append everything below to the page-scoped <style> block already in
+      <head> (the one that starts with the "/* new header *\/" comment).
+   2. DELETE the old rules from that same block: .header-gif, .header-left,
+      .header-right, .greenbox, .greenbox-text, and every media-query
+      override that targets them. They are no longer used.
+   3. Paste the markup from paste-into-wysiwyg.html into the WYSIWYG field,
+      replacing the old .header-gif markup.
+
+   No JavaScript. No external libraries. No new font files — GT Walsheim Bold
+   is already served by the theme.
+
+   NOTE: the old CSS asked for 'GT Walsheim Medium', which is not a family
+   this site defines, so it silently fell back to the system sans. The correct
+   declaration for GT Walsheim Bold is:
+       font-family: "GT Walsheim Rg";  font-weight: bold;
+   ========================================================================== */
+
+
+/* --- The brick wrapper ----------------------------------------------------
+   Same treatment already applied to brick--id--2430: let the block run
+   full width instead of being held inside the content column.            */
+.brick--id--2429 .wysiwyg-block {
+  padding: 0;
+  max-width: none;
+}
+
+
+/* --- Root ----------------------------------------------------------------
+   Full-bleed via negative margins rather than the 105vw/110vw + translateX
+   approach used elsewhere on this page. This is exactly viewport width, so
+   it never overflows and never depends on overflow-x:hidden to hide a
+   spill.                                                                  */
+.unstuck-header {
+  /* Brand palette — change here, nowhere else. */
+  --uh-navy:   #002a5c;
+  --uh-coral:  #f05356;
+  --uh-white:  #ffffff;
+  --uh-slate:  #8b95a6;   /* career words in the ticker */
+
+  /* How far in from each edge the ticker fades. Only used if the edge-fade
+     mask down in .uh-ticker is uncommented — it is currently off. */
+  --uh-fade:   12%;
+
+  /* Arrow bounce: matches the banner ads'
+     { x: 3, y: -3, duration: 0.18, yoyo: true, repeat: 3 } — two bounces. */
+  --uh-bounce-delay: 2.8s;
+
+  /* Ticker loop durations. Higher = slower. Lengths differ per line, so
+     these are tuned to keep the three lines moving at a similar speed. */
+  --uh-dur-1:  60s;
+  --uh-dur-2:  53s;
+  --uh-dur-3:  71s;
+
+  position: relative;
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+  padding: clamp(2rem, 6vw, 5.5rem) 0 clamp(2rem, 5.5vw, 5rem);
+  background-color: var(--uh-navy);
+  overflow: hidden;
+  font-family: "GT Walsheim Rg", "Helvetica Neue", Arial, sans-serif;
+}
+
+.unstuck-header *,
+.unstuck-header *::before,
+.unstuck-header *::after {
+  box-sizing: border-box;
+}
+
+/* Prefixed .unstuck-header .uh-* below to outrank this reset — don't shorten. */
+.unstuck-header p,
+.unstuck-header div,
+.unstuck-header svg {
+  margin: 0;
+}
+
+.unstuck-header svg {
+  display: block;
+  max-width: 100%;
+}
+
+
+/* --- Logo ----------------------------------------------------------------
+   PRESENTATION ONLY. The live page already renders this logo above, in
+   #block-scsnewlogowhite.                                               */
+.unstuck-header .uh-logo {
+  display: flex;
+  justify-content: center;
+  margin-bottom: clamp(1.5rem, 4.8vw, 4.5rem);
+}
+
+.uh-logo svg {
+  width: clamp(180px, 21vw, 340px);
+  height: auto;
+}
+
+.unstuck-header .uh-headline {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: clamp(0.75rem, 3.2vw, 3.4rem);
+  margin: 0;
+  padding: 0 clamp(1rem, 4vw, 3rem);
+}
+
+
+.uh-hl {
+  height: clamp(30px, 5.57vw, 92px);
+  width: auto;
+  flex: 0 1 auto;
+}
+
+/* Fills live here, not in the SVG markup, so the palette stays in one place
+   and both headlines cannot drift apart. */
+.uh-hl .uh-w { fill: var(--uh-white); }
+.uh-hl .uh-c { fill: var(--uh-coral); }
+
+/* The headline is artwork, so the <h1> carries its text for screen readers
+   and search engines. Visually hidden, still announced. */
+.uh-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Wrapper carries the bounce; the mark itself carries the scale-in, so the
+   two transforms never overwrite each other. */
+.uh-arrow {
+  display: block;
+  flex-shrink: 0;
+  width: clamp(18px, 2.6vw, 46px);
+}
+
+.uh-arrow-mark {
+  width: 100%;
+  height: auto;
+  transform-origin: 0% 100%;        /* grows out of the bottom-left corner */
+}
+
+.uh-arrow-mark polygon { fill: var(--uh-coral); }
+.uh-logo path          { fill: var(--uh-white); }
+
+
+/* --- Ticker --------------------------------------------------------------
+   Three lines. 1 and 3 travel left, 2 travels right.                     */
+.unstuck-header .uh-ticker {
+  margin-top: clamp(1.5rem, 4.6vw, 4.25rem);
+
+  /* EDGE FADE — currently off.
+
+  -webkit-mask-image: linear-gradient(to right,
+      transparent 0%, #000 var(--uh-fade),
+      #000 calc(100% - var(--uh-fade)), transparent 100%);
+          mask-image: linear-gradient(to right,
+      transparent 0%, #000 var(--uh-fade),
+      #000 calc(100% - var(--uh-fade)), transparent 100%);
+  */
+}
+
+.uh-row {
+  overflow: hidden;
+  opacity: 0;
+  animation: uh-fade 0.8s ease-out both;
+}
+
+.uh-track {
+  display: flex;
+  width: max-content;
+  will-change: transform;
+}
+
+/* One copy of the line's content. The track holds four identical copies, so
+   translating it by -50% lands copy 3 exactly where copy 1 started — a
+   seam-free loop with no JS measuring anything.
+
+   Four, not two: half the track has to be at least as wide as the viewport
+   or an empty gap swings through once per cycle. Because font-size caps at
+   36px while the viewport keeps growing, two copies fall short from about
+   1900px up — which is most desktops. Four covers to ~3340px. */
+.uh-seq {
+  display: block;
+  white-space: nowrap;
+  flex: 0 0 auto;
+
+  font-weight: bold;             
+  font-size: clamp(15px, 2.2vw, 36px);
+  line-height: 1.14;
+  letter-spacing: 0.005em;
+  text-transform: uppercase;     
+  color: var(--uh-slate);
+}
+
+.uh-and {
+  color: var(--uh-coral);
+}
+
+
+/* --- Motion -------------------------------------------------------------- */
+@keyframes uh-rise {
+  from { opacity: 0; transform: translateY(0.35em); }
+  to   { opacity: 1; transform: none; }
+}
+
+@keyframes uh-pop {
+  from { opacity: 0; transform: scale(0); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes uh-nudge {
+  0%, 50%, 100% { transform: translate(0, 0); }
+  25%,      75% { transform: translate(6.5%, -6.5%); }
+}
+
+@keyframes uh-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes uh-scroll-left {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+@keyframes uh-scroll-right {
+  from { transform: translateX(-50%); }
+  to   { transform: translateX(0); }
+}
+
+.uh-logo        { animation: uh-fade 0.7s ease-out 0.10s both; }
+.uh-hl-1        { animation: uh-rise 0.75s cubic-bezier(.22,.68,.24,1) 0.35s both; }
+.uh-arrow-mark  { animation: uh-pop  0.55s cubic-bezier(.34,1.56,.64,1) 0.95s both; }
+.uh-hl-2        { animation: uh-rise 0.75s cubic-bezier(.22,.68,.24,1) 1.20s both; }
+
+.uh-arrow       { animation: uh-nudge 0.72s ease-in-out var(--uh-bounce-delay) both; }
+
+.uh-row-1       { animation-delay: 1.60s; }
+.uh-row-2       { animation-delay: 1.75s; }
+.uh-row-3       { animation-delay: 1.90s; }
+
+.uh-row-1 .uh-track { animation: uh-scroll-left  var(--uh-dur-1) linear infinite; }
+.uh-row-2 .uh-track { animation: uh-scroll-right var(--uh-dur-2) linear infinite; }
+.uh-row-3 .uh-track { animation: uh-scroll-left  var(--uh-dur-3) linear infinite; }
+
+
+/* --- Narrow screens ------------------------------------------------------ */
+@media (max-width: 860px) {
+  .unstuck-header .uh-headline {
+    flex-direction: column;
+    gap: clamp(0.6rem, 2.5vw, 1.25rem);
+  }
+
+  .uh-hl {
+    height: min(12.4vw, 67px);
+    width: auto;
+  }
+
+  /* The arrow keeps its desktop orientation — no rotation. */
+  .uh-arrow {
+    width: clamp(22px, 5vw, 34px);
+  }
+
+  .uh-seq {
+    font-size: clamp(14px, 3.6vw, 24px);
+  }
+}
+
+
+/* --- Reduced motion ------------------------------------------------------ */
+@media (prefers-reduced-motion: reduce) {
+  .unstuck-header .uh-logo,
+  .unstuck-header .uh-hl,
+  .unstuck-header .uh-arrow,
+  .unstuck-header .uh-arrow-mark,
+  .unstuck-header .uh-row,
+  .unstuck-header .uh-track {
+    animation: none !important;
+    opacity: 1;
+    transform: none;
+  }
+}
