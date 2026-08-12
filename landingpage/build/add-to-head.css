@@ -53,9 +53,9 @@
 
   /* Ticker loop durations. Higher = slower. Lengths differ per line, so
      these are tuned to keep the three lines moving at a similar speed. */
-  --uh-dur-1:  60s;
-  --uh-dur-2:  53s;
-  --uh-dur-3:  71s;
+  --uh-dur-1:  100s;
+  --uh-dur-2:  83s;
+  --uh-dur-3:  121s;
 
   position: relative;
   width: 100vw;
