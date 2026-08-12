@@ -241,14 +241,14 @@
 
 .uh-logo        { animation: uh-fade 0.7s ease-out 0.10s both; }
 .uh-hl-1        { animation: uh-rise 0.75s cubic-bezier(.22,.68,.24,1) 0.35s both; }
-.uh-arrow-mark  { animation: uh-pop  0.55s cubic-bezier(.34,1.56,.64,1) 0.95s both; }
-.uh-hl-2        { animation: uh-rise 0.75s cubic-bezier(.22,.68,.24,1) 1.20s both; }
+.uh-hl-2        { animation: uh-rise 0.75s cubic-bezier(.22,.68,.24,1) 0.95s both; }
+.uh-arrow-mark  { animation: uh-pop  0.55s cubic-bezier(.34,1.56,.64,1) 1.2s both; }
 
 .uh-arrow       { animation: uh-nudge 0.72s ease-in-out var(--uh-bounce-delay) both; }
 
 .uh-row-1       { animation-delay: 1.60s; }
-.uh-row-2       { animation-delay: 1.75s; }
-.uh-row-3       { animation-delay: 1.90s; }
+.uh-row-2       { animation-delay: 1.60s; }
+.uh-row-3       { animation-delay: 1.60s; }
 
 .uh-row-1 .uh-track { animation: uh-scroll-left  var(--uh-dur-1) linear infinite; }
 .uh-row-2 .uh-track { animation: uh-scroll-right var(--uh-dur-2) linear infinite; }
