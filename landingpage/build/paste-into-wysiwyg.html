@@ -12,12 +12,12 @@
   screen readers; the other three are marked aria-hidden. If you change a
   line, change all four copies identically, or the loop will jump.
 
-  WHY FOUR: the loop works by sliding the track left by exactly half its
-  width. For no empty gap to appear, half the track must be at least as
-  wide as the widest browser window — so two copies have to span the
-  viewport. At the largest type size that means roughly 3340px of cover,
-  which is every realistic desktop. If you ever shorten a line a lot, add
-  another pair of copies rather than removing any.
+  WHY FOUR: each copy slides left by exactly its own width, so after one
+  cycle they have all shifted one place along and the line looks unchanged.
+  For no empty gap to appear, three copies have to span the widest browser
+  window. At the largest type size that is roughly 5000px of cover, which is
+  every realistic desktop. If you ever shorten a line a lot, add another copy
+  rather than removing one.
 -->
 
 <div class="unstuck-header">
@@ -106,30 +106,24 @@
   <div class="uh-ticker">
 
     <div class="uh-row uh-row-1">
-      <div class="uh-track">
         <span class="uh-seq">Project manager <span class="uh-and">and</span> poet <span class="uh-and">and</span> Accountant <span class="uh-and">and</span> app builder <span class="uh-and">and</span> Marketer <span class="uh-and">and</span> data analyst <span class="uh-and">and</span>&nbsp;</span>
         <span class="uh-seq" aria-hidden="true">Project manager <span class="uh-and">and</span> poet <span class="uh-and">and</span> Accountant <span class="uh-and">and</span> app builder <span class="uh-and">and</span> Marketer <span class="uh-and">and</span> data analyst <span class="uh-and">and</span>&nbsp;</span>
         <span class="uh-seq" aria-hidden="true">Project manager <span class="uh-and">and</span> poet <span class="uh-and">and</span> Accountant <span class="uh-and">and</span> app builder <span class="uh-and">and</span> Marketer <span class="uh-and">and</span> data analyst <span class="uh-and">and</span>&nbsp;</span>
         <span class="uh-seq" aria-hidden="true">Project manager <span class="uh-and">and</span> poet <span class="uh-and">and</span> Accountant <span class="uh-and">and</span> app builder <span class="uh-and">and</span> Marketer <span class="uh-and">and</span> data analyst <span class="uh-and">and</span>&nbsp;</span>
-      </div>
     </div>
 
     <div class="uh-row uh-row-2">
-      <div class="uh-track">
         <span class="uh-seq">Nurse <span class="uh-and">and</span> novelist <span class="uh-and">and</span> Electrician <span class="uh-and">and</span> essayist <span class="uh-and">and</span> Chef <span class="uh-and">and</span> project manager <span class="uh-and">and</span>&nbsp;</span>
         <span class="uh-seq" aria-hidden="true">Nurse <span class="uh-and">and</span> novelist <span class="uh-and">and</span> Electrician <span class="uh-and">and</span> essayist <span class="uh-and">and</span> Chef <span class="uh-and">and</span> project manager <span class="uh-and">and</span>&nbsp;</span>
         <span class="uh-seq" aria-hidden="true">Nurse <span class="uh-and">and</span> novelist <span class="uh-and">and</span> Electrician <span class="uh-and">and</span> essayist <span class="uh-and">and</span> Chef <span class="uh-and">and</span> project manager <span class="uh-and">and</span>&nbsp;</span>
         <span class="uh-seq" aria-hidden="true">Nurse <span class="uh-and">and</span> novelist <span class="uh-and">and</span> Electrician <span class="uh-and">and</span> essayist <span class="uh-and">and</span> Chef <span class="uh-and">and</span> project manager <span class="uh-and">and</span>&nbsp;</span>
-      </div>
     </div>
 
     <div class="uh-row uh-row-3">
-      <div class="uh-track">
         <span class="uh-seq">Teacher <span class="uh-and">and</span> learning designer <span class="uh-and">and</span> Trial lawyer <span class="uh-and">and</span> mindfulness teacher <span class="uh-and">and</span> Hairstylist <span class="uh-and">and</span> entrepreneur <span class="uh-and">and</span>&nbsp;</span>
         <span class="uh-seq" aria-hidden="true">Teacher <span class="uh-and">and</span> learning designer <span class="uh-and">and</span> Trial lawyer <span class="uh-and">and</span> mindfulness teacher <span class="uh-and">and</span> Hairstylist <span class="uh-and">and</span> entrepreneur <span class="uh-and">and</span>&nbsp;</span>
         <span class="uh-seq" aria-hidden="true">Teacher <span class="uh-and">and</span> learning designer <span class="uh-and">and</span> Trial lawyer <span class="uh-and">and</span> mindfulness teacher <span class="uh-and">and</span> Hairstylist <span class="uh-and">and</span> entrepreneur <span class="uh-and">and</span>&nbsp;</span>
         <span class="uh-seq" aria-hidden="true">Teacher <span class="uh-and">and</span> learning designer <span class="uh-and">and</span> Trial lawyer <span class="uh-and">and</span> mindfulness teacher <span class="uh-and">and</span> Hairstylist <span class="uh-and">and</span> entrepreneur <span class="uh-and">and</span>&nbsp;</span>
-      </div>
     </div>
 
   </div>

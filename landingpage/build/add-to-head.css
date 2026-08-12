@@ -51,11 +51,12 @@
      { x: 3, y: -3, duration: 0.18, yoyo: true, repeat: 3 } — two bounces. */
   --uh-bounce-delay: 2.8s;
 
-  /* Ticker loop durations. Higher = slower. Lengths differ per line, so
-     these are tuned to keep the three lines moving at a similar speed. */
-  --uh-dur-1:  100s;
-  --uh-dur-2:  83s;
-  --uh-dur-3:  121s;
+  /* Ticker loop durations — the time for one copy to travel its own width.
+     Higher = slower. Lengths differ per line, so these are tuned to keep the
+     three lines moving at a similar speed (~38px/sec). */
+  --uh-dur-1:  50s;
+  --uh-dur-2:  41.5s;
+  --uh-dur-3:  60.5s;
 
   position: relative;
   width: 100vw;
@@ -170,28 +171,38 @@
   */
 }
 
+/* The copies are direct flex children of the row — there is deliberately no
+   inner track element. See the note on .uh-seq. */
 .uh-row {
+  display: flex;
   overflow: hidden;
   opacity: 0;
   animation: uh-fade 0.8s ease-out both;
 }
 
-.uh-track {
-  display: flex;
-  width: max-content;
-  will-change: transform;
-}
+/* One copy of the line's content. Each copy animates itself by translateX
+   (-100%) — exactly its own width — so after one cycle every copy has moved
+   left by one slot and the arrangement is identical. Seam-free, no JS.
 
-/* One copy of the line's content. The track holds four identical copies, so
-   translating it by -50% lands copy 3 exactly where copy 1 started — a
-   seam-free loop with no JS measuring anything.
+   WHY EACH COPY ANIMATES ITSELF rather than one wide track sliding by -50%
+   (which is what this used to do, and what broke in Safari):
 
-   Four, not two: half the track has to be at least as wide as the viewport
-   or an empty gap swings through once per cycle. Because font-size caps at
-   36px while the viewport keeps growing, two copies fall short from about
-   1900px up — which is most desktops. Four covers to ~3340px. */
+   1. The old track needed `width: max-content` to size itself to its
+      children. Safari resolves that unreliably on a flex container across a
+      resize; when it falls back to auto the track becomes row-width, the
+      copies overflow, and whole chunks vanish behind overflow:hidden.
+      A percentage of the element's OWN width needs no intrinsic sizing at
+      all, so there is nothing left to get wrong.
+   2. The track was one element up to ~8,950px wide carrying
+      `will-change: transform`, i.e. a single composited layer past WebKit's
+      tile limit — which blanks regions of it. Four ~2,000px layers are
+      comfortably inside every limit.
+
+   Coverage rule: with n copies, (n-1) x copy-width must be >= the widest
+   viewport, or a gap swings through once per cycle. Four copies of the
+   shortest line covers to ~5,000px. If a line is ever shortened a lot, add
+   another copy rather than removing one. */
 .uh-seq {
-  display: block;
   white-space: nowrap;
   flex: 0 0 auto;
 
@@ -229,13 +240,14 @@
   to   { opacity: 1; }
 }
 
+/* -100% is one copy's own width — not a fraction of a parent track. */
 @keyframes uh-scroll-left {
   from { transform: translateX(0); }
-  to   { transform: translateX(-50%); }
+  to   { transform: translateX(-100%); }
 }
 
 @keyframes uh-scroll-right {
-  from { transform: translateX(-50%); }
+  from { transform: translateX(-100%); }
   to   { transform: translateX(0); }
 }
 
@@ -250,9 +262,9 @@
 .uh-row-2       { animation-delay: 1.60s; }
 .uh-row-3       { animation-delay: 1.60s; }
 
-.uh-row-1 .uh-track { animation: uh-scroll-left  var(--uh-dur-1) linear infinite; }
-.uh-row-2 .uh-track { animation: uh-scroll-right var(--uh-dur-2) linear infinite; }
-.uh-row-3 .uh-track { animation: uh-scroll-left  var(--uh-dur-3) linear infinite; }
+.uh-row-1 .uh-seq { animation: uh-scroll-left  var(--uh-dur-1) linear infinite; }
+.uh-row-2 .uh-seq { animation: uh-scroll-right var(--uh-dur-2) linear infinite; }
+.uh-row-3 .uh-seq { animation: uh-scroll-left  var(--uh-dur-3) linear infinite; }
 
 
 /* --- Narrow screens ------------------------------------------------------ */
@@ -285,7 +297,7 @@
   .unstuck-header .uh-arrow,
   .unstuck-header .uh-arrow-mark,
   .unstuck-header .uh-row,
-  .unstuck-header .uh-track {
+  .unstuck-header .uh-seq {
     animation: none !important;
     opacity: 1;
     transform: none;
