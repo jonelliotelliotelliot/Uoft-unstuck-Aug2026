@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Unstuck — infinite tunnel study</title>
+
+<!--
+  A study, not a deliverable. Animates the agency's 23-circle graphic as an
+  endless tunnel without ever adding a 24th circle.
+
+  WHY THIS WORKS SO CLEANLY
+  The artwork is not freehand. Measured from tunnel.svg, the 23 circles are a
+  strict geometric progression:
+
+      radius ratio k = 1.064521      (sd 5.5e-05 — constant to machine precision)
+
+  Every circle is the innermost one scaled by k^i about a single fixed point.
+  Rebuilding the artwork from that one ratio matches it to within 0.014px
+  across all 23 circles. So scaling the figure by exactly k lands each circle
+  precisely where its neighbour was — the loop is exact, not fudged.
+
+  Each circle rides a continuous "depth" d that advances one slot per cycle and
+  wraps at 23. When a circle wraps it jumps from outermost to innermost, which
+  is the only discontinuity in the whole animation; a short opacity ramp at
+  each end means it is already invisible when it teleports. Circle count is
+  therefore always exactly 23 per cluster.
+
+  LAYOUT
+  Cluster positions are taken from SVG/overlap-guide.svg: a 961.52 x 947.98
+  canvas with the four fixed points at (90.95, 53.06) and its mirrors, which
+  pushes the clusters far enough in that their outer rings cross in the middle.
+  The guide drops the three innermost circles from the two bottom clusters;
+  they are restored here, since the tunnel needs all 23 slots filled to cycle.
+-->
+
+<script src="https://s0.2mdn.net/ads/studio/cached_libs/gsap_3.11.5_min.js"></script>
+
+<style>
+  :root {
+    --coral: #f74552;
+    --navy:  #002a5c;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--coral);
+    font-family: "GT Walsheim Rg", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: var(--navy);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .frame {
+    position: relative;
+    width: min(96vmin, 1000px);
+    aspect-ratio: 961.52 / 947.98;
+  }
+
+  #stage { display: block; width: 100%; height: 100%; }
+
+  .ring {
+    fill: none;
+    stroke: #fff;
+    stroke-miterlimit: 10;
+    stroke-width: 1px;
+
+    /* Essential, not cosmetic. Each circle carries its own scale, and a
+       wrapped circle is scaled by k^-22 while its neighbours sit at k^p —
+       so without this the strokes render in two visibly different weights
+       at once and the rings look doubled up. Pinning the stroke also
+       matches the artwork, where all 23 circles are a flat 0.75px. */
+    vector-effect: non-scaling-stroke;
+  }
+
+  /* Centre panel, placed from the rect in SVG/full-guide.svg:
+     x 217.29  y 200.7  w 505.52  h 520.02  on a 961.52 x 947.98 canvas. */
+  .panel {
+    position: absolute;
+    left:   22.60%;
+    top:    21.17%;
+    right:  24.83%;
+    bottom: 23.97%;
+    background: var(--coral);
+    transition: opacity 0.35s ease;
+  }
+  .panel img {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+  .panel.hidden { opacity: 0; pointer-events: none; }
+
+  /* --- controls --- */
+  .controls {
+    position: fixed;
+    left: 16px;
+    bottom: 16px;
+    background: rgba(0, 42, 92, 0.92);
+    color: #fff;
+    padding: 14px 16px;
+    border-radius: 8px;
+    font-size: 12px;
+    line-height: 1.5;
+    display: grid;
+    gap: 9px;
+    width: 232px;
+    backdrop-filter: blur(6px);
+  }
+  .controls h2 {
+    margin: 0 0 2px;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    opacity: 0.65;
+    font-weight: 700;
+  }
+  .row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .row label { opacity: 0.85; }
+  .row output { font-variant-numeric: tabular-nums; opacity: 0.85; min-width: 3.4em; text-align: right; }
+  input[type=range] { width: 100%; accent-color: var(--coral); }
+  .btns { display: flex; gap: 6px; }
+  button {
+    flex: 1;
+    font: inherit;
+    font-size: 11px;
+    color: #fff;
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.28);
+    border-radius: 5px;
+    padding: 5px 6px;
+    cursor: pointer;
+  }
+  button:hover { background: rgba(255,255,255,0.22); }
+  button[aria-pressed="true"] { background: var(--coral); border-color: var(--coral); }
+  .note { opacity: 0.55; font-size: 10.5px; line-height: 1.45; }
+</style>
+</head>
+<body>
+
+<div class="frame">
+  <svg id="stage" viewBox="0 0 961.52 947.98" aria-hidden="true">
+    <rect width="961.52" height="947.98" fill="#f74552"/>
+  </svg>
+
+  <!-- The agency's own panel artwork, placed at the rect from full-guide.svg.
+       box.svg carries its own coral background, type and CTA rule. -->
+  <div class="panel" id="panel">
+    <img src="SVG/box.svg" alt="">
+  </div>
+</div>
+
+<div class="controls">
+  <h2>Tunnel study</h2>
+
+  <!-- Slider carries SPEED, not duration: dragging right makes it faster. -->
+  <div class="row">
+    <label for="speed">Speed</label>
+    <output id="speedOut"></output>
+  </div>
+  <input type="range" id="speed" min="0.25" max="4" step="0.01" value="0.91">
+
+  <!-- Extra rings are added inward, so the outermost never moves. -->
+  <div class="row">
+    <label for="count">Circles</label>
+    <output id="countOut"></output>
+  </div>
+  <input type="range" id="count" min="23" max="32" step="1" value="23">
+
+  <div class="btns">
+    <button id="dir" aria-pressed="true">Forward</button>
+    <button id="play" aria-pressed="true">Pause</button>
+  </div>
+  <div class="btns">
+    <button id="panelBtn" aria-pressed="true">Panel</button>
+  </div>
+
+  <div class="note" id="note"></div>
+</div>
+
+<script>
+/* ---------------------------------------------------------------------------
+   Constants measured from tunnel.svg and SVG/overlap-guide.svg.
+   --------------------------------------------------------------------------- */
+const K      = 1.064521;    // radius ratio between adjacent circles
+const BASE_N = 23;          // the artwork's own count — the slider's floor
+const MAX_N  = 32;          // slider ceiling
+const FADE   = 1.6;         // slots of opacity ramp at each end
+const R0     = 51.65;       // innermost radius at BASE_N
+const DX     = 51.644;      // innermost centre offset from the fixed point
+const DY     = 51.649;
+
+// Four fixed points, mirrored. sx/sy flip the cluster into its corner.
+const CLUSTERS = [
+  { px:  90.95, py:  53.06, sx:  1, sy:  1 },
+  { px: 836.29, py:  53.06, sx: -1, sy:  1 },
+  { px:  90.95, py: 846.19, sx:  1, sy: -1 },
+  { px: 836.29, py: 846.19, sx: -1, sy: -1 }
+];
+
+/* --- Build ---------------------------------------------------------------- */
+const SVG_NS = "http://www.w3.org/2000/svg";
+const stage  = document.getElementById("stage");
+
+// Build the maximum up front; applyCount() decides how many are in play and
+// re-lays them out. Geometry has to be recomputed on every count change, not
+// just revealed, because the whole progression shifts (see applyCount).
+const clusters = CLUSTERS.map(cfg => {
+  const g = document.createElementNS(SVG_NS, "g");
+  const rings = [];
+  for (let i = 0; i < MAX_N; i++) {
+    const c = document.createElementNS(SVG_NS, "circle");
+    c.setAttribute("class", "ring");
+    g.appendChild(c);
+    rings.push(c);
+  }
+  stage.appendChild(g);
+  return { cfg, rings };
+});
+
+/* --- How many rings --------------------------------------------------------
+   Extras are added OUTWARD: the innermost ring stays pinned at the artwork's
+   own r=51.65 and the progression simply continues past K^22. The new rings
+   are the biggest ones, so they reach further across the middle and the four
+   clusters overlap each other more — which is the point of the setting.
+   --------------------------------------------------------------------------- */
+let count = BASE_N;
+
+function applyCount(n) {
+  count = n;
+
+  for (const { cfg, rings } of clusters) {
+    rings.forEach((c, j) => {
+      if (j >= n) { c.style.display = "none"; return; }
+      const s = Math.pow(K, j);
+      c.setAttribute("cx", cfg.px + cfg.sx * DX * s);
+      c.setAttribute("cy", cfg.py + cfg.sy * DY * s);
+      c.setAttribute("r",  R0 * s);
+      c.style.display = "";
+    });
+  }
+
+  $("countOut").textContent = n + " per cluster";
+  $("note").textContent = n === BASE_N
+    ? "23 — the artwork exactly."
+    : `${n - BASE_N} added outward · ${n * 4} on screen`;
+  render();
+}
+
+/* --- Render one frame ------------------------------------------------------
+   Circle j sits at continuous depth d = (j + p) mod count. Getting it there is
+   a scale of K^(d-j) about that cluster's fixed point — including the wrap,
+   where a circle scales by K^-(count-1) and lands exactly on the innermost
+   slot, because the figure is self-similar about that point.
+
+   p only ever spans 0..1: one ring-step per tween cycle. After a single step
+   every ring has moved up one slot and the set of depths is unchanged, so the
+   repeat is the seam. That also means changing the ring count needs nothing
+   from the tween.
+
+   Direction is applied HERE rather than by reversing the tween. A GSAP tween
+   with repeat:-1 cannot play below time 0, so timeScale(-1) runs the playhead
+   back to zero and then silently freezes — still reporting paused:false and
+   isActive:true, which looks exactly like "the animation randomly stopped".
+   Flipping the sign in the maths keeps the tween always moving forwards.
+   --------------------------------------------------------------------------- */
+const state = { p: 0 };
+let dir = 1;               // +1 rings grow (Forward) · -1 rings shrink (Reverse)
+
+function render() {
+  const p = (((state.p * dir) % count) + count) % count;
+
+  for (const { cfg, rings } of clusters) {
+    for (let j = 0; j < count; j++) {
+      const d = (j + p) % count;
+      const s = Math.pow(K, d - j);
+      const o = Math.min(1, d / FADE, (count - d) / FADE);
+
+      const c = rings[j];
+      c.setAttribute("transform",
+        `translate(${cfg.px} ${cfg.py}) scale(${s}) translate(${-cfg.px} ${-cfg.py})`);
+      c.style.opacity = o;
+    }
+  }
+}
+
+/* --- Drive it with GSAP ----------------------------------------------------
+   One tween on a plain object is the clock; render() writes the 92 transforms.
+   ease:"none" is essential — constant velocity in log space is what the eye
+   reads as steady forward motion. Any easing turns the tunnel into a pulse.
+
+   The tween always counts UP and always runs at timeScale 1. Forward/Reverse
+   is a sign flip inside render(), not a reversed playhead — see the note there.
+   --------------------------------------------------------------------------- */
+const drive = gsap.to(state, {
+  p: 1,                     // exactly one ring-step per cycle
+  duration: 1.1,
+  ease: "none",
+  repeat: -1,
+  onUpdate: render
+});
+
+/* --- Controls -------------------------------------------------------------- */
+const $ = id => document.getElementById(id);
+const speed = $("speed");
+
+// The slider value is rings per second, so dragging right speeds it up. The
+// readout stays in seconds per ring, which is the easier number to picture.
+function applySpeed() {
+  const secPerRing = 1 / +speed.value;
+  drive.duration(secPerRing);          // one cycle == one ring-step
+  $("speedOut").textContent = secPerRing.toFixed(2) + "s / ring";
+}
+
+speed.addEventListener("input", applySpeed);
+$("count").addEventListener("input", e => applyCount(+e.currentTarget.value));
+
+// Never reverses the playhead — just flips the sign render() reads.
+$("dir").addEventListener("click", e => {
+  dir = -dir;
+  const fwd = dir === 1;
+  e.currentTarget.textContent = fwd ? "Forward" : "Reverse";
+  e.currentTarget.setAttribute("aria-pressed", fwd);
+  render();
+});
+
+$("play").addEventListener("click", e => {
+  const playing = drive.paused();
+  drive.paused(!playing);
+  e.currentTarget.textContent = playing ? "Pause" : "Play";
+  e.currentTarget.setAttribute("aria-pressed", playing);
+});
+
+$("panelBtn").addEventListener("click", e => {
+  const on = $("panel").classList.toggle("hidden");
+  e.currentTarget.setAttribute("aria-pressed", !on);
+});
+
+applySpeed();
+applyCount(+$("count").value);
+</script>
+</body>
+</html>
